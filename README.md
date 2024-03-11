@@ -2,5 +2,4 @@
 
 ## Teorema de la función implícita
 
-Considere la función $z = f(x_{1},...,x_{n})$
-
+Sea $F:\mathbb{R}^{n+m}\rightarrow\mathbb{R}^{m}$ una función continuamente derivable, y sea $\mathbb{R}^{n+m}$ con coordenadas $(x,y) = (x_{1},...,x_{n},y_{1},...,y_{m})$ 
