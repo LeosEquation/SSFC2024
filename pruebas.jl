@@ -10,3 +10,5 @@ p_fin = 1.0
 orden = 10
 
 solfams = SolFam.(g, x_ini, p_ini, Δs, p_fin,orden)
+
+plot(solfams, leg = false, title = "Familias de Soluciones", ylabel = "u(λ)", xlabel = "λ", c = "blue")
