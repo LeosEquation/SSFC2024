@@ -4,7 +4,7 @@ export SolFam
 
 using TaylorSeries, LinearAlgebra
 
-function Newton(f::Function,x0::Taylor1,p0::Float64)
+function Newton(f::Function,x0::Taylor1,p0::Union{Float64,Vector{Float64}})
     x_new = x0
     i = 1
     while i <= 30 && abs(f(x_new(0.0),p0)) > 1.e-16
@@ -13,6 +13,18 @@ function Newton(f::Function,x0::Taylor1,p0::Float64)
         i+=1
     end
     return x_new(0.0)
+end
+
+function Newton(f::Function,x0::Vector{TaylorN},p0::Union{Float64,Vector{Float64}})
+    x_new = x0
+    N = length(x0)
+    i = 1
+    while i <= 30 && abs(f(x_new(zeros(N)),p0)) > 1.e-16
+        x_old = x_new
+        x_new = x_old - inv(jacobian(x_old)) * f(x_old(zeros(N)),p0)
+        i+=1
+    end
+    return x_new(zeros(N))
 end
 
 function Newton(f::Function,x0::Union{Float64,Vector{Float64}},p0::Taylor1)
@@ -27,6 +39,20 @@ function Newton(f::Function,x0::Union{Float64,Vector{Float64}},p0::Taylor1)
 end
 
 x_p(f::Function, x::Float64, p::Float64, orden::Int64) = -derivative(f(x,p+Taylor1(orden)))(0.0)/derivative(f(x+Taylor1(orden),p))(0.0)
+
+
+"""function IFT(f::Function, x::Float64, p::Union{Float64,Vector{Float64}}, orden::Int64, indice::Int64)
+    
+    if length(p) > 1
+        T = [Taylor1(orden):Taylor1(1)(0.0) ? i = indice for i in 1:length(p)]
+    else 
+        T = Taylor1(orden)
+    end
+
+    return -derivative(f(x,p+T))(0.0)/derivative(f(x+Taylor1(orden),p))(0.0)
+end"""
+
+
 
 function first_step(f::Function,x_ini::Float64,p_ini::Float64,p_fin::Float64,orden::Int64)
     t = Taylor1(orden)
