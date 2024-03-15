@@ -1,9 +1,9 @@
-include("solution_family.jl")
+include("src/solution_family.jl")
 using .SolutionFamily, Plots
 
 g(u,λ) = (u^2-1)*(u^2-4) + λ*u^2*exp(u/10)
 
-x_ini = [2.0,-1.0]
+x_ini = [1.0,-1.0]
 p_ini = 0.0
 Δs= 0.001
 p_fin = 2.0
