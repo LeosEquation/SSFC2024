@@ -40,15 +40,15 @@ module TaylorNewton
     end
 
     function Newton(f!::Function,x0::Vector{Float64},p0::Union{Float64,Vector{Float64}},orden::Int64)
-        x_new = x0
+        x_new = x0 + [Taylor1([0.0],orden) for i in 1:length(x0)]
         i = 1
-        dx_new = [Taylor(0) for i in 1:length(x0)]
-        f!(dx,x0,p0)
+        dx_new = [Taylor1(0) for i in 1:length(x0)]
+        f!(dx_new,x0,p0)
         while i <= 30 && norm(dx_new(0.0)) > 1.e-16
             x_old = x_new
             x_new = x_old - inv(NonlinearSystem.Jacobian(f!,x_old(0.0),p0,orden))*dx_new(0.0)
             i+=1
-            f!(dx_new,x_new,p0)
+            f!(dx_new,x_new(0.0),p0)
         end
         return x_new(0.0)
     end
@@ -56,12 +56,13 @@ module TaylorNewton
     function Newton(f!::Function,x0::Vector{Float64},p0::Taylor1)
         p_new = p0
         i = 1
-        dx_new = [Taylor(0) for i in 1:length(x0)]
-        f!(dx,x0,p0)
+        dx_new = [Taylor1(0) for i in 1:length(x0)]
+        f!(dx_new,x0,p0(0.0))
         while i <= 30 && norm(dx_new(0.0)) > 1.e-16
             p_old = p_new
-            p_new = p_old - inv(NonlinearSystem.Jacobian(f!,x0,p_old))*dx_new(0.0)
+            p_new = p_old - transpose(1 ./ NonlinearSystem.Jacobian(f!,x0,p_old)) * dx_new(0.0)
             i+=1
+            f!(dx_new,x0,p_new(0.0))
         end
         return p_new(0.0)
     end
@@ -70,12 +71,13 @@ module TaylorNewton
         p_new = p0
         i = 1
         dx_new = [Taylor(0) for i in 1:length(x0)]
-        f!(dx,x0,p0)
+        f!(dx_new,x0,p0)
         while i <= 30 && norm(dx_new(0.0)) > 1.e-16
             p_old = p_new
             p_new = p_old - [j == indice ? inv(NonlinearSystem.Jacobian(f!,x0,p_old,orden,indice))*dx_new(0.0) : 0.0 for j in 1:length(p)]
             i+=1
         end
+        f!(dx_new,x0,p0)
         return p_new(0.0)
     end
 

@@ -13,16 +13,18 @@ module NonlinearSystem
                 J[j,i] = derivative(dx[j])(0.0)
             end
         end
+        #println(J)
         return J
     end
 
     function Jacobian(f!::Function, x::Vector{Float64}, p::Taylor1)
         J = zeros(length(x))
-        dx = [Taylor1(0) for i in 1:length(x)]
+        dx = [Taylor1([0.0],(length(p)-1)) for i in 1:length(x)]
         f!(dx,x,p)
         for i in 1:length(x)
-            J[i] = derivative(dx[i])(0.0)
+            J[i] = derivative(dx[i] + Taylor1([0.0],(length(p)-1)))(0.0)
         end
+        println(J)
         return J
     end
 

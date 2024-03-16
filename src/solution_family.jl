@@ -7,7 +7,7 @@ module SolutionFamily
     include("implicit_function.jl")
 
     import .PArcLength, .TaylorNewton, .ImplicitFunction
-    using TaylorSeries 
+    using TaylorSeries, LinearAlgebra
 
     function Solution_family(f::Function, x_ini::Float64, p_ini::Float64, Δs::Float64, p_fin::Float64,orden::Int64; tol = 1.e-16, N = 10000)
             
@@ -86,6 +86,63 @@ module SolutionFamily
             x = TaylorNewton.Newton(f,x + x_s*Δs + t,p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p)])
             p = TaylorNewton.Newton(f,x,p + [i == indice ? p_s*Δs + t : Taylor1(0) for i in 1:length(p)],indice)
             push!(P,p[indice])
+            push!(X,x)
+            i+=1  
+        end
+
+        return P[1:end-1],X[1:end-1]
+
+    end
+
+
+
+
+
+    function Solution_family(f!::Function, x_ini::Vector{Float64}, p_ini::Float64, Δs::Float64, p_fin::Float64,orden::Int64; tol = 1.e-16, N = 10000)
+            
+        X = Vector{Float64}[]
+        P = Float64[]
+
+        t = Taylor1(orden)
+
+        push!(P,p_ini)
+        push!(X,x_ini)
+
+        x_s, p_s = PArcLength.first_step(f!, x_ini, p_ini, p_fin,orden)
+
+        #println(x_s)
+        
+        x = x_ini + x_s*Δs
+        p = p_ini + p_s*Δs
+
+        
+        x = TaylorNewton.Newton(f!,x,p,orden)
+        p = TaylorNewton.Newton(f!,x,p + t)
+
+        dx_old = [Taylor1(0) for i in 1:length(x_ini)]
+        f!(dx_old,x,p)
+
+        #println(dx_old(0.0))
+        #println(norm(dx_old(0.0)))
+
+        if norm(dx_old(0.0)) <= 1.e-16
+            push!(P,p)
+            push!(X,x)
+        else
+            throw(ArgumentError("No se pudo calcular el primer paso, prueba con valores iniciales distintos"))
+        end
+        
+
+        i = 0
+
+        while p_ini <= p <= p_fin && i <= N
+
+            println(p_s)
+            x_s, p_s = PArcLength.step(f!, x, p, x_s, p_s ,orden)
+            
+            x = TaylorNewton.Newton(f!,x + x_s*Δs,p + p_s*Δs,orden)
+            p = TaylorNewton.Newton(f!,x,p + p_s*Δs + t)
+            push!(P,p)
             push!(X,x)
             i+=1  
         end
