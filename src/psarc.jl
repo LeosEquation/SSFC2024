@@ -7,7 +7,7 @@ include("nonlinear_system.jl")
 
 #import .ImplicitFunction, .NonlinearSystem
 
-#using TaylorSeries, LinearAlgebra
+using TaylorSeries, LinearAlgebra
 
 
 function first_step(f::Function,x_ini::Float64,p_ini::Float64,p_fin::Float64,orden::Int64)
