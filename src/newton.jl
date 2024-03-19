@@ -4,7 +4,7 @@
 
 include("nonlinear_system.jl")
 
-using TaylorSeries
+# using TaylorSeries
 
 function Newton(f::Function,x0::Taylor1,p0::Union{Float64,Vector{Float64}})
     x_new = x0
