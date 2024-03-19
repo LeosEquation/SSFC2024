@@ -4,11 +4,19 @@
 # soluciones de un sistema unidimensional o multidimensional.
 
 
+<<<<<<< HEAD
 using TaylorSeries, LinearAlgebra
 
 include("psarc.jl")
 include("newton.jl")
 include("implicit_function.jl")
+=======
+    include("psarc.jl")
+    include("newton.jl")
+
+    import .PArcLength, .TaylorNewton
+    using TaylorSeries 
+>>>>>>> d04fd0627ac1424a363ce5448ed6bfd2e8250f05
 
 # # Caso de variable unidimensinal con parametros escalares o vectoriales, permitiendo en este último escoger el parámetro de la familia de soluciones
 
@@ -55,6 +63,7 @@ function Solution_family(f::Function, x_ini::Float64, p_ini::Float64, Δs::Float
         push!(X,x)
         i+=1  
     end
+<<<<<<< HEAD
 
     return P[1:end-1],X[1:end-1]
 
@@ -244,3 +253,6 @@ function Solution_family(f!::Function, x_ini::Vector{Float64}, p_ini::Vector{Flo
     return P[1:end-1],X[1:end-1]
 
 end
+=======
+end
+>>>>>>> d04fd0627ac1424a363ce5448ed6bfd2e8250f05

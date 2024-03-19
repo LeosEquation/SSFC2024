@@ -1,2 +1,2 @@
-# SSFC2024
-Repositorio de mi servicio social
+# Simulaciones numéricas en módelos de ecuaciones diferenciales.
+

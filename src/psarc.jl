@@ -35,6 +35,7 @@ function step(f::Function,x_ini::Float64, p_ini::Float64, x_s::Float64,p_s::Floa
     return x_s_new, p_s_new
 end
 
+<<<<<<< HEAD
 
 
 function first_step(f::Function,x_ini::Float64,p_ini::Vector{Float64},p_fin::Float64,orden::Int64, indice::Int64)
@@ -123,3 +124,6 @@ end
 
 
 #end
+=======
+end
+>>>>>>> d04fd0627ac1424a363ce5448ed6bfd2e8250f05
