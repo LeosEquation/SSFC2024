@@ -2,13 +2,9 @@
 
  #   export Newton
 
-<<<<<<< HEAD
 include("nonlinear_system.jl")
 
-#using TaylorSeries, LinearAlgebra, .NonlinearSystem
-=======
-    using TaylorSeries
->>>>>>> d04fd0627ac1424a363ce5448ed6bfd2e8250f05
+using TaylorSeries
 
 function Newton(f::Function,x0::Taylor1,p0::Union{Float64,Vector{Float64}})
     x_new = x0
@@ -43,7 +39,6 @@ function Newton(f::Function,x0::Float64,p0::Vector{Taylor1{Float64}},indice::Int
     return p_new(0.0)
 end
 
-<<<<<<< HEAD
 function Newton(f!::Function,x0::Vector{Float64},p0::Union{Float64,Vector{Float64}},orden::Int64)
     x_new = x0 + [Taylor1([0.0],orden) for i in 1:length(x0)]
     i = 1
@@ -89,6 +84,4 @@ end
 
 
 #end
-=======
 end
->>>>>>> d04fd0627ac1424a363ce5448ed6bfd2e8250f05
