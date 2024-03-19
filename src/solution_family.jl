@@ -7,7 +7,6 @@ using TaylorSeries, LinearAlgebra
 
 include("psarc.jl")
 include("newton.jl")
-include("implicit_function.jl")
 
 # # Caso de variable unidimensinal con parametros escalares o vectoriales, permitiendo en este último escoger el parámetro de la familia de soluciones
 
