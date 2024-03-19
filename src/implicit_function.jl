@@ -4,7 +4,6 @@
 include("nonlinear_system.jl")
 
 #using TaylorSeries, .NonlinearSystem
-using TaylorSeries
 
 function Implicit_function(f::Function, x::Float64, p::Float64, orden::Int64)
     return -derivative(f(x,p+Taylor1(orden)))(0.0)/derivative(f(x+Taylor1(orden),p))(0.0)
