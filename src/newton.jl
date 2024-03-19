@@ -82,6 +82,3 @@ function Newton(f!::Function,x0::Vector{Float64},p0::Vector{Taylor1{Float64}},or
     return p_new(0.0)
 end
 
-
-#end
-end

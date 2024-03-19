@@ -119,6 +119,3 @@ function step(f!::Function,x_ini::Vector{Float64}, p_ini::Vector{Float64}, x_s::
     return Solution[1:end-1], Solution[end]
 end
 
-
-#end
-end

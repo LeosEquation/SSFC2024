@@ -23,4 +23,3 @@ function Implicit_function(f!::Function, x::Vector{Float64}, p::Vector{Float64},
 end
 
 #end
-end
