@@ -20,4 +20,4 @@ Este método (también usualmente conocido como *Pseudo Arc Length Continuation*
 
 $$ \dfrac{d**x**}{dt} = F(**x**,\lambda) $$
 
-donde $F:\mathbb{R}^{n+1} \rightarrow \mathbb{R}^{n}$, $\begin{pmatrix} **x** \\ \lambda \end{pmatrix}  \xmapst F(**x**,\lambda)$
+donde $F:\mathbb{R}^{n+1} \rightarrow \mathbb{R}^{n}$, $\begin{pmatrix} **x** \\ \lambda \end{pmatrix}   F(**x**,\lambda)$
