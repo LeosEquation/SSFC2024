@@ -42,4 +42,4 @@ $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|\dfrac{
 
 Entonces, tenemos la expresión de la derivada de la variavle y parámetro respecto a $s$.
 
-$$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} \ \ \ \dfrac{dG}{ds} = \dot{\G} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} $$
+$$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} \ \ \ \dfrac{dG}{ds} = \dot{G} = -J_{x}^{-1}J_{\lambda} \dot{\lambda}$$
