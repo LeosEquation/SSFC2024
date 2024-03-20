@@ -9,3 +9,11 @@ Este proyecto forma parte de un programa de Servicio Social para obtener el grad
 #### Supervisor
 
 - Luis Benet Fernández. Doctor en Física Teórica y Profesor Asociado, Instituto de Ciencias Físicas, Universidad Nacional Autónoma de México (UNAM)
+
+#### Lista de métodos
+
+- Continuación por pseudo-longitud de arco
+
+## Pseudo-longitud de arco
+
+Este método (también usualmente conocido como *Pseudo Arc Length Continuation* en inglés)
