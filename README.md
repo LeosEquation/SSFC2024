@@ -32,5 +32,5 @@ $$\dfrac{dG}{d\lambda} = -J_{x}^{-1}J_{\lambda} = -\begin{bmatrix} \dfrac{\parti
 
 En otras palabras, este método sirve para calcular la función $G$ relacionada al sistema $F$ dado. Para esto, se introduce un nuevo parámetro $s$ que describe la longitud de arco y se define como
 
-$$ds = \sqrt{1 + ||G(\lambda)||^{2}} d\lambda $$
+$$ds = d\lambda \sqrt{1 + ||G(\lambda)||^{2}}
 
