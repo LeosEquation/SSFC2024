@@ -36,5 +36,5 @@ $$ds = d\lambda \sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right
 
 De esta definicion podemos encontrar 2 relaciones.
 
-$$1 = \dfrac{d\lambda^{2}}{ds^{2}}\left(1 + \dfrac{||dG(\lambda)||^{2}}{d\lambda^{2}}\right) = \dfrac{d\lambda^{2}}{ds^{2}} + \dfrac{||dG(\lambda)||^{2}}{ds^{2}} = \dot{\lambda}^{2{ + \dot{G}^{2}$$
+$$1 = \dfrac{d\lambda^{2}}{ds^{2}}\left(1 + \dfrac{||dG(\lambda)||^{2}}{d\lambda^{2}}\right) = \dfrac{d\lambda^{2}}{ds^{2}} + \dfrac{||dG(\lambda)||^{2}}{ds^{2}} = \dot{\lambda}^{2} + \dot{G}^{2}$$
 
