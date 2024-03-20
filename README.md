@@ -19,5 +19,7 @@ Este proyecto forma parte de un programa de Servicio Social para obtener el grad
 Este método (también usualmente conocido como *Pseudo Arc Length Continuation* (PACL) en inglés) es utilizado para encontrar las raíces del sistema de un ecuaciones diferenciales dado, partiendo de un parámetro inicial y sus respectivas raíces del sistema. Para encontrar estas raíces se usa el método de Newton sobre la variable y el parámetro del sistema. Si tenemos un sistema de ecuaciones diferenciales expresado de esta manera
 
 $$ \dfrac{d**x**}{dt} = F(**x**,\lambda) $$
+
 $$F:\mathbb{R}^{n+1} \rightarrow \mathbb{R}^{n}$$
+
 $$ \begin{pmatrix} **x** \\ \lambda \end{pmatrix}   F(**x**,\lambda) $$ 
