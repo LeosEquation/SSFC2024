@@ -46,7 +46,7 @@ Así obtenemos la derivada de $G$ y del parámetro $\lambda$ respecto a $s$.
 
 $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} \ \, \ \dfrac{dG}{ds} = \dot{G} = -J_{x}^{-1}J_{\lambda} \dot{\lambda}$$
 
-Estas 2 relaciones nos sirven para calcular el paso en cada variable. Buscamos llegar a $(\vec{x},\lambda)$ desde el punto inicial $(\vec{x}_{0},\lambda_{0}$ tal que ambos estén en $\Omega$. Primero damos un paso haciendo uso de sus derivadas:
+Estas 2 relaciones nos sirven para calcular el paso en cada variable. Buscamos llegar a $(\vec{x},\lambda)$ desde el punto inicial $(\vec{x}\_{0},\lambda\_{0}$ tal que ambos estén en $\Omega$. Primero damos un paso haciendo uso de sus derivadas:
 
 $$ \vec{x} = \vec{x}\_{0} + \dot{G}(\vec{x}\_{0},\lambda\_{0})\Delta \vec{x} $$
 
