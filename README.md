@@ -34,11 +34,13 @@ En otras palabras, este método sirve para calcular la función $G$ relacionada 
 
 $$ds = d\lambda \sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}$$
 
-De esta definicion podemos encontrar 2 relaciones.
-
-$$1 = \dfrac{d\lambda^{2}}{ds^{2}}\left(1 + \dfrac{||dG(\lambda)||^{2}}{d\lambda^{2}}\right) = \dfrac{d\lambda^{2}}{ds^{2}} + \dfrac{||dG(\lambda)||^{2}}{ds^{2}} = \dot{\lambda}^{2} + ||\dot{G}(\lambda)||^{2}$$
+De esta definicion llegamos a que:
 
 $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} $$
+
+Además, tenemos que $F$ no depende de $s$, por ello:
+
+$$\dfrac{dF}{ds} = \vec{0} = J_{x} \dfrac{dG}{ds} + J_{\lambda}\dfrac{d\lambda}{ds} = J_{x}\dot{G} + J{\lambda}\dot{\lambda}$$
 
 Entonces, tenemos la expresión de la derivada de la variavle y parámetro respecto a $s$.
 
