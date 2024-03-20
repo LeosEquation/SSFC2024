@@ -38,7 +38,7 @@ De esta definicion llegamos a que:
 
 $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} $$
 
-Además, tenemos que $F$ no depende de $s$, por ello:
+Además, tenemos que $F(s) = F(G(s),\lambda (s)) = \vec{0}$ para todo $s$:
 
 $$\dfrac{dF}{ds} = \vec{0} = J_{x} \dfrac{dG}{ds} + J_{\lambda}\dfrac{d\lambda}{ds} = J_{x}\dot{G} + J_{\lambda}\dot{\lambda}$$
 
