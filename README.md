@@ -26,4 +26,4 @@ $$F:\mathbb{R}^{n+1} \rightarrow \mathbb{R}^{n}$$
 
 $$ (\vec{x},\lambda) \xmapsto[]{}   F(\vec{x},\lambda) $$
 
-Si $F$ es continuamente diferenciable y existe un conjunto $\Omega \subset \mathbb{R}^{n+1}$ tal que $F(\vec{x},\lambda) = 0$ para todo $(\vec{x},\lambda) \in \Omega$
+Si $F$ es continuamente diferenciable y existe un conjunto $\Omega \subset \mathbb{R}^{n+1}$ tal que $F(\vec{x},\lambda) = 0$ para todo $(\vec{x},\lambda) \in \Omega$, entonces existe una función $G:D\subset\mathbb{R} \rightarrow \mathbb{R}^{n}$ tal que $(G(\lambda),\lambda)\in\Omega$ para todo $\lambda \in D$
