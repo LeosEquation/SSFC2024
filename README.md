@@ -48,6 +48,6 @@ $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{
 
 Estas 2 relaciones nos sirven para calcular el paso en cada variable. Buscamos llegar a $(\vec{x},\lambda)$ desde el punto inicial $(\vec{x}_{0},\lambda_{0}$ tal que ambos estén en $\Omega$. Primero damos un paso haciendo uso de sus derivadas:
 
-$$ \vec{x} = \vec{x}\_{0} + \dot{G}(\vec{x}\_{0},\lambda\_{0})*\Delta \vec{x} $$
+$$ \vec{x} = \vec{x}\_{0} + \dot{G}(\vec{x}\_{0},\lambda\_{0})\Delta \vec{x} $$
 
-$$ \lambda = \lambda\_{0} + \dot{\lambda}(\vec{x}\_{0},\lambda_{0})*\Delta \lambda $$
+$$ \lambda = \lambda\_{0} + \dot{\lambda}(\vec{x}\_{0},\lambda_{0})\Delta \lambda $$
