@@ -22,4 +22,4 @@ $$ \dfrac{d**x**}{dt} = F(**x**,\lambda) $$
 
 $$F:\mathbb{R}^{n+1} \rightarrow \mathbb{R}^{n}$$
 
-$$ \begin{pmatrix} **x** \\\ \lambda \end{pmatrix} \xmapsto   F(**x**,\lambda) $$ 
+$$ \begin{pmatrix} **x** \\\ \lambda \end{pmatrix} \xmapst   F(**x**,\lambda) $$ 
