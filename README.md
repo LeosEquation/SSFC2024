@@ -40,7 +40,7 @@ $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|\dfrac{
 
 Además, tenemos que $F$ no depende de $s$, por ello:
 
-$$\dfrac{dF}{ds} = \vec{0} = J_{x} \dfrac{dG}{ds} + J_{\lambda}\dfrac{d\lambda}{ds} = J_{x}\dot{G} + J{\lambda}\dot{\lambda}$$
+$$\dfrac{dF}{ds} = \vec{0} = J_{x} \dfrac{dG}{ds} + J_{\lambda}\dfrac{d\lambda}{ds} = J_{x}\dot{G} + J_{\lambda}\dot{\lambda}$$
 
 Entonces, tenemos la expresión de la derivada de la variavle y parámetro respecto a $s$.
 
