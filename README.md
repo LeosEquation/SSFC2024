@@ -50,4 +50,4 @@ Estas 2 relaciones nos sirven para calcular el paso en cada variable. Buscamos l
 
 $$ \vec{x} = \vec{x}\_{0} + \dot{G}(\vec{x}\_{0},\lambda\_{0})*\Delta \vec{x} $$
 
-$$ \lambda = \lambda_{0} + \dot{\lambda}(\vec{x}_{0},\lambda_{0})*\Delta \lambda $$
+$$ \lambda = \lambda\_{0} + \dot{\lambda}(\vec{x}\_{0},\lambda_{0})*\Delta \lambda $$
