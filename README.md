@@ -14,6 +14,6 @@ Este proyecto forma parte de un programa de Servicio Social para obtener el grad
 
 - Continuación por pseudo-longitud de arco
 
-## Pseudo-longitud de arco
+## COntinuación por seudo-longitud de arco
 
 Este método (también usualmente conocido como *Pseudo Arc Length Continuation* en inglés)
