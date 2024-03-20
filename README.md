@@ -42,6 +42,6 @@ Además, tenemos que $F$ no depende de $s$, por ello:
 
 $$\dfrac{dF}{ds} = \vec{0} = J_{x} \dfrac{dG}{ds} + J_{\lambda}\dfrac{d\lambda}{ds} = J_{x}\dot{G} + J_{\lambda}\dot{\lambda}$$
 
-Entonces, tenemos la expresión de la derivada de la variavle y parámetro respecto a $s$.
+Así obtenemos la derivada de $G$ y del parámetro $\lambda$ respecto a $s$.
 
 $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} \ \, \ \dfrac{dG}{ds} = \dot{G} = -J_{x}^{-1}J_{\lambda} \dot{\lambda}$$
