@@ -38,4 +38,8 @@ De esta definicion podemos encontrar 2 relaciones.
 
 $$1 = \dfrac{d\lambda^{2}}{ds^{2}}\left(1 + \dfrac{||dG(\lambda)||^{2}}{d\lambda^{2}}\right) = \dfrac{d\lambda^{2}}{ds^{2}} + \dfrac{||dG(\lambda)||^{2}}{ds^{2}} = \dot{\lambda}^{2} + \dot{G}(\lambda)^{2}$$
 
-$$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}} = \dfrac{1}{\sqrt{1 + \left|\left|-J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} $$
+$$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} $$
+
+Entonces, tenemos la expresión de la derivada de la variavle y parámetro respecto a $s$.
+
+$$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} \ \ \ \dfrac{dG}{ds} = \dot{\G} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}}
