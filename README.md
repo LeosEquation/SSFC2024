@@ -28,4 +28,4 @@ $$ (\vec{x},\lambda) \xmapsto[]{}   F(\vec{x},\lambda) $$
 
 Según el teorema de la función implícita (*IFT* por sus siglas en inglés) si $F$ es continuamente diferenciable y existe un conjunto $\Omega \subset \mathbb{R}^{n+1}$ tal que $F(\vec{x},\lambda) = 0$ para todo $(\vec{x},\lambda) \in \Omega$, entonces existe una función $G:D\subset\mathbb{R} \rightarrow \mathbb{R}^{n}$ tal que $(G(\lambda),\lambda)\in\Omega$ para todo $\lambda \in D$ y además se asegura que
 
-$$\dfrac{dG}{d\lambda} = -J_{x}^{-1}J_{\lambda} = -\begin{bmatrix} \dfrac{partial F_{1}}{\partial x_{1}} & \cdots & \dfrac{partial F_{1}}{\partial x_{n}} \\\ \vdots & \ddots & \vdots \\\ \dfrac{partial F_{n}}{\partial x_{1}} & \dfrac{partial F_{n}}{\partial x_{n}} \end{bmatrix}^{-1} $$
+$$\dfrac{dG}{d\lambda} = -J_{x}^{-1}J_{\lambda} = -\begin{bmatrix} \dfrac{\partial F_{1}}{\partial x_{1}} & \cdots & \dfrac{\partial F_{1}}{\partial x_{n}} \\\ \vdots & \ddots & \vdots \\\ \dfrac{\partial F_{n}}{\partial x_{1}} & \cdots & \dfrac{\partial F_{n}}{\partial x_{n}} \end{bmatrix}^{-1} \begin{bmatrix} \dfrac{\partial F_{1}}{\partial \lambda} \\\ \dfrac{\partial F_{n}}{\partial \lambda} \end{bmatrix}$$
