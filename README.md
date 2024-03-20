@@ -4,7 +4,7 @@ Este proyecto forma parte de un programa de Servicio Social para obtener el grad
 
 #### Autor
 
-- Leonel Mayorga López. Estudiante de Licenciatura Física, Facultad de Ciencias, Universidad Nacional Autónoma de México (UNAM).
+- Leonel Mayorga López. Estudiante de Licenciatura en Física, Facultad de Ciencias, Universidad Nacional Autónoma de México (UNAM).
 
 #### Supervisor
 
