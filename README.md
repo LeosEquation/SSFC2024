@@ -16,7 +16,7 @@ Este proyecto forma parte de un programa de Servicio Social para obtener el grad
 
 ## Continuación por pseudo-longitud de arco
 
-Este método (también usualmente conocido como *Pseudo Arc Length Continuation* (PACL) en inglés) es utilizado para encontrar las raíces del sistema de un ecuaciones diferenciales dado, partiendo de un parámetro inicial y sus respectivas raíces del sistema. Calcula numéricamente los pasos $\Delta \vec{x}$ y $\lambda$ a dar para encontrar la siguiente raíz usando el método de Newton a partir del paso anterior. La ventaja de este método es que cada paso cambia manteniendo que $||\Delta \vec{x}||^{2} + \Delta \lambda ^{2} \approxx \Delta s$ para todos los pasos dados y siempre el avance resulta en un punto cercano a una raíz, así se asegura que el método de Newton converga en cada paso.
+Este método (también usualmente conocido como *Pseudo Arc Length Continuation* (PACL) en inglés) es utilizado para encontrar las raíces del sistema de un ecuaciones diferenciales dado, partiendo de un parámetro inicial y sus respectivas raíces del sistema. Calcula numéricamente los pasos $\Delta \vec{x}$ y $\Delta \lambda$ a dar para encontrar la siguiente raíz usando el método de Newton a partir del paso anterior. La ventaja de este método es que cada paso cambia manteniendo que $||\Delta \vec{x}||^{2} + \Delta \lambda ^{2} \approx \Delta s$ para todos los pasos dados y siempre el avance resulta en un punto cercano a una raíz, así se asegura que el método de Newton converga en cada paso.
 
 Tenemos un sistema de ecuaciones diferenciales expresado de esta manera:
 
