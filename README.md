@@ -30,4 +30,7 @@ Según el teorema de la función implícita (*IFT* por sus siglas en inglés) si
 
 $$\dfrac{dG}{d\lambda} = -J_{x}^{-1}J_{\lambda} = -\begin{bmatrix} \dfrac{\partial F_{1}}{\partial x_{1}} & \cdots & \dfrac{\partial F_{1}}{\partial x_{n}} \\\ \vdots & \ddots & \vdots \\\ \dfrac{\partial F_{n}}{\partial x_{1}} & \cdots & \dfrac{\partial F_{n}}{\partial x_{n}} \end{bmatrix}^{-1} \begin{bmatrix} \dfrac{\partial F_{1}}{\partial \lambda} \\\ \vdots \\\ \dfrac{\partial F_{n}}{\partial \lambda} \end{bmatrix}$$
 
+En otras palabras, este método sirve para calcular la función $G$ relacionada al sistema $F$ dado. Para esto, se introduce un nuevo parámetro $s$ que describe la longitud de arco y se define como
+
+$$ds = \sqrt{1 + ||G(\lambda)||^{2}} d\lambda $$
 
