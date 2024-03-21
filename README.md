@@ -34,7 +34,7 @@ En otras palabras, este método sirve para calcular la función $G$ relacionada 
 
 $$ds = d\lambda \sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}$$
 
-$$ds = \dfrac{d\lambda}{ds}+ \left|\left|\dfrac{dG}{ds}\right|\right| \left|\dfrac{ds}{d\lambda}\\right|$$
+$$1 = \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2}$$
 
 De esta definicion llegamos a que:
 
