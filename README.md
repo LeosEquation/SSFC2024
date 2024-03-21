@@ -41,14 +41,6 @@ Así, el método consiste en resolver el siguiente sistema de ecuaciones:
 $$ F(\vec{x}(s),\lambda(s)) = \vec{0} $$
 $$ \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2} = 1 $$
 
-Hay una forma de reescribir el segundo renglón, considerando los métodos de derivación hacía delante (forward) y hacia atras (bakcward) y asumiendo que $\Delta s^{2} \approx 0$:
-
-$$ \dot{\lambda}(s\_{0}) = \left. \dfrac{d\lambda}{ds}\right|\_{s = s\_{0}} = \dfrac{\lambda\_{1} - \lambda\_{0}}{\Delta s} = \left. \dfrac{d\lambda}{ds}\right|\_{s\_{1}} = \dot{\lambda}(s\_{1}) $$
-
-$$ \dot{G}(s\_{0}) = \left. \dfrac{dG}{ds}\right|\_{s = s\_{0}} = \dfrac{G(\lambda\_{1}) - G(\lambda\_{0})}{\Delta s} = \left. \dfrac{dG}{ds}\right|\_{s = s\_{1}} = \dot{G}(s\_{1})$$
-
-$$ \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2} = \left.\dfrac{d\lambda}{ds}\right|\_{s = s\_{0}}\left.\dfrac{d\lambda}{ds}\right|\_{s = s\_{1}} + \left|\left|\left.\dfrac{dG}{ds}\right|\_{s = s\_{0}}\right|\right|\left|\left|\left.\dfrac{dG}{ds}\right|\_{s = s\_{1}}\right|\right| $$
-
 De esta definicion llegamos a que:
 
 $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} $$
