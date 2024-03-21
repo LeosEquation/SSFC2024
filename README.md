@@ -41,11 +41,11 @@ Así, el método consiste en resolver el siguiente sistema de ecuaciones:
 $$ F(\vec{x}(s),\lambda(s)) = \vec{0} $$
 $$ \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2} = 1 $$
 
-Hay una forma de reescribir el segundo renglón, considerando los métodos de derivación hacía delante (forward) y hacia atras (bakcward):
+Hay una forma de reescribir el segundo renglón, considerando los métodos de derivación hacía delante (forward) y hacia atras (bakcward) y asumiendo que $\Delta s^{2} \approx 0$:
 
 $$ \left. \dfrac{d\lambda}{ds}\right|\_{s = s\_{0}} = \dfrac{\lambda\_{1} - \lambda\_{0}}{\Delta s} = \left. \dfrac{d\lambda}{ds}\right|\_{s\_{1}} $$
 
-$$ \left. \dfrac{dG}{ds}\right|\_{s = s\_{0}} = \dfrac{\G(\lambda\_{1}) - G(\lambda\_{0})}{\Delta s} = \left. \dfrac{d\lambda}{ds}\right|\_{s = s\_{1}} $$
+$$ \left. \dfrac{dG}{ds}\right|\_{s = s\_{0}} = \dfrac{G(\lambda\_{1}) - G(\lambda\_{0})}{\Delta s} = \left. \dfrac{dG}{ds}\right|\_{s = s\_{1}} $$
 
 De esta definicion llegamos a que:
 
