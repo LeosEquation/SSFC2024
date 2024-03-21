@@ -34,6 +34,8 @@ En otras palabras, este método sirve para calcular la función $G$ relacionada 
 
 $$ds = d\lambda \sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}$$
 
+$$ds = \dfrac{d\lambda}{ds}d\lambda + ||\dfrac{dG}{ds}||||dG||$$
+
 De esta definicion llegamos a que:
 
 $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} $$
@@ -46,8 +48,5 @@ Así obtenemos la derivada de $G$ y del parámetro $\lambda$ respecto a $s$.
 
 $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} \ \, \ \dfrac{dG}{ds} = \dot{G} = -J_{x}^{-1}J_{\lambda} \dot{\lambda}$$
 
-Estas 2 relaciones nos sirven para calcular el paso en cada variable. Buscamos llegar a $(\vec{x},\lambda)$ desde el punto inicial $(\vec{x}\_{0},\lambda\_{0})$ tal que ambos estén en $\Omega$. Primero damos un paso haciendo uso de sus derivadas:
-
-$$ \vec{x} = \vec{x}\_{0} + \dot{G}(\vec{x}\_{0},\lambda\_{0})\Delta s \Rightarrow \vec{x} - \vec{x}\_{0} = \dot{G}(\vec{x}\_{0},\lambda\_{0})\Delta s  = \dfrac{-J_{x}^{-1}(\vec{x}\_{0},\lambda\_{0})J_{\lambda}(\vec{x}\_{0},\lambda\_{0})\Delta s}{\sqrt{1 + \left|\left|J_{x}^{-1}(\vec{x}\_{0},\lambda\_{0})J_{\lambda}(\vec{x}\_{0},\lambda\_{0})\right|\right|^{2}}}$$
-
-$$ \lambda = \lambda\_{0} + \dot{\lambda}(\vec{x}\_{0},\lambda_{0})\Delta s \Rightarrow \lambda - \lambda\_{0} = \dot{\lambda}(\vec{x}\_{0},\lambda_{0})\Delta s = \dfrac{\Delta s}{\sqrt{1 + \left|\left|J_{x}^{-1}(\vec{x}\_{0},\lambda\_{0})J_{\lambda}(\vec{x}\_{0},\lambda\_{0})\right|\right|^{2}}} $$
+$$ F(G(s),\lambda(s)) = \vec{0} $$
+$$ 
