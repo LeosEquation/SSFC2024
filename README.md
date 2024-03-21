@@ -36,6 +36,15 @@ $$ds = d\lambda \sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right
 
 $$1 = \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2}$$
 
+Así, el método consiste en resolver el siguiente sistema de ecuaciones:
+
+$$ F(\vec{x}(s),\lambda(s)) = \vec{0} $$
+$$ \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2} = 1 $$
+
+Hay una forma de reescribir el segundo renglón, considerando los métodos de derivación hacía delante (forward) y hacia atras (bakcward):
+
+$$ \left \dfrac{d\lambda}{ds}\right|\_{s\_{0}} = \dfrac{\lambda_{1} - \lambda_{0}}{\Delta s} = \left \dfrac{d\lambda}{ds}\right|\_{s\_{0}} $$
+
 De esta definicion llegamos a que:
 
 $$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} $$
@@ -46,7 +55,4 @@ $$\dfrac{dF}{ds} = \vec{0} = J_{x} \dfrac{dG}{ds} + J_{\lambda}\dfrac{d\lambda}{
 
 Así obtenemos la derivada de $G$ y del parámetro $\lambda$ respecto a $s$.
 
-$$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} \ \, \ \dfrac{dG}{ds} = \dot{G} = -J_{x}^{-1}J_{\lambda} \dot{\lambda}$$
-
-$$ F(G(s),\lambda(s)) = \vec{0} $$
-$$ 
+$$\dfrac{d\lambda}{ds} = \dot{\lambda} = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} \ \, \ \dfrac{dG}{ds} = \dot{G} = -J_{x}^{-1}J_{\lambda} \dot{\lambda}$$.0
