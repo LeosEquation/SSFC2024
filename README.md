@@ -50,4 +50,4 @@ Estas 2 relaciones nos sirven para calcular el paso en cada variable. Buscamos l
 
 $$ \vec{x} = \vec{x}\_{0} + \dot{G}(\vec{x}\_{0},\lambda\_{0})\Delta s \Rightarrow \vec{x} - \vec{x}\_{0} = \dot{G}(\vec{x}\_{0},\lambda\_{0})\Delta s  = \dfrac{-J_{x}^{-1}(\vec{x}\_{0},\lambda\_{0})J_{\lambda}(\vec{x}\_{0},\lambda\_{0})}{\sqrt{1 + \left|\left|J_{x}^{-1}(\vec{x}\_{0},\lambda\_{0})J_{\lambda}(\vec{x}\_{0},\lambda\_{0})\right|\right|^{2}}}$$
 
-$$ \lambda = \lambda\_{0} + \dot{\lambda}(\vec{x}\_{0},\lambda_{0})\Delta s \Rightarrow \lambda - \lambda\_{0} = \dot{\lambda}(\vec{x}\_{0},\lambda_{0})\Delta s = \dfrac{1}{\sqrt{1 + \left|\left|J_{x}^{-1}J_{\lambda}\right|\right|^{2}}} $$
+$$ \lambda = \lambda\_{0} + \dot{\lambda}(\vec{x}\_{0},\lambda_{0})\Delta s \Rightarrow \lambda - \lambda\_{0} = \dot{\lambda}(\vec{x}\_{0},\lambda_{0})\Delta s = \dfrac{\Delta s}{\sqrt{1 + \left|\left|J_{x}^{-1}(\vec{x}\_{0},\lambda\_{0})J_{\lambda}(\vec{x}\_{0},\lambda\_{0})\right|\right|^{2}}} $$
