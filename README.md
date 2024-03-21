@@ -43,9 +43,11 @@ $$ \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\rig
 
 Hay una forma de reescribir el segundo renglón, considerando los métodos de derivación hacía delante (forward) y hacia atras (bakcward) y asumiendo que $\Delta s^{2} \approx 0$:
 
-$$ \left. \dfrac{d\lambda}{ds}\right|\_{s = s\_{0}} = \dfrac{\lambda\_{1} - \lambda\_{0}}{\Delta s} = \left. \dfrac{d\lambda}{ds}\right|\_{s\_{1}} $$
+$$ \dot{\lambda}(s\_{0}) = \left. \dfrac{d\lambda}{ds}\right|\_{s = s\_{0}} = \dfrac{\lambda\_{1} - \lambda\_{0}}{\Delta s} = \left. \dfrac{d\lambda}{ds}\right|\_{s\_{1}} = \dot{\lambda}(s\_{1}) $$
 
-$$ \left. \dfrac{dG}{ds}\right|\_{s = s\_{0}} = \dfrac{G(\lambda\_{1}) - G(\lambda\_{0})}{\Delta s} = \left. \dfrac{dG}{ds}\right|\_{s = s\_{1}} $$
+$$ \dot{G}(s\_{0}) = \left. \dfrac{dG}{ds}\right|\_{s = s\_{0}} = \dfrac{G(\lambda\_{1}) - G(\lambda\_{0})}{\Delta s} = \left. \dfrac{dG}{ds}\right|\_{s = s\_{1}} = \dot{G}(s\_{1})$$
+
+
 
 De esta definicion llegamos a que:
 
