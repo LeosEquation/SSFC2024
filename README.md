@@ -47,7 +47,7 @@ $$ \dot{\lambda}(s\_{0}) = \left. \dfrac{d\lambda}{ds}\right|\_{s = s\_{0}} = \d
 
 $$ \dot{G}(s\_{0}) = \left. \dfrac{dG}{ds}\right|\_{s = s\_{0}} = \dfrac{G(\lambda\_{1}) - G(\lambda\_{0})}{\Delta s} = \left. \dfrac{dG}{ds}\right|\_{s = s\_{1}} = \dot{G}(s\_{1})$$
 
-$$ \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2} = \left.\dfrac{d\lambda}{ds}\right|\_{s = s\_{0}}\left.\dfrac{d\lambda}{ds}\right|\_{s = s\_{1}} + \left.\dfrac{dG}{ds}\right|\_{s = s\_{0}}\left.\dfrac{dG}{ds}\right|\_{s = s\_{1}} $$
+$$ \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2} = \left.\dfrac{d\lambda}{ds}\right|\_{s = s\_{0}}\left.\dfrac{d\lambda}{ds}\right|\_{s = s\_{1}} + \left|\left|\left.\dfrac{dG}{ds}\right|\_{s = s\_{0}}\right|\right|\left|\left|\left.\dfrac{dG}{ds}\right|\_{s = s\_{1}}\right|\right| $$
 
 De esta definicion llegamos a que:
 
