@@ -32,9 +32,9 @@ $$\dfrac{dG}{d\lambda} = -J_{x}^{-1}J_{\lambda} = -\begin{bmatrix} \dfrac{\parti
 
 En otras palabras, este método sirve para calcular la función $G$ relacionada al sistema $F$ dado. Para esto, se introduce un nuevo parámetro $s$ que describe la longitud de arco y se define infinitesimalmente como:
 
-$$ds = d\lambda \sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}}$$
+$$ ds = d\lambda \sqrt{1 + \left|\left|\dfrac{dG(\lambda)}{d\lambda}\right|\right|^{2}} $$
 
-$$1 = \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2}$$
+$$ 1 = \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2} $$
 
 Así, el método consiste en resolver el siguiente sistema de ecuaciones:
 
@@ -47,7 +47,7 @@ $$ \dot{\lambda}(s\_{0}) = \left. \dfrac{d\lambda}{ds}\right|\_{s = s\_{0}} = \d
 
 $$ \dot{G}(s\_{0}) = \left. \dfrac{dG}{ds}\right|\_{s = s\_{0}} = \dfrac{G(\lambda\_{1}) - G(\lambda\_{0})}{\Delta s} = \left. \dfrac{dG}{ds}\right|\_{s = s\_{1}} = \dot{G}(s\_{1})$$
 
-
+$$ \left(\dfrac{d\lambda}{ds}\right)^{2} + \left|\left|\dfrac{dG}{ds}\right|\right|^{2} = \left.\dfrac{d\lambda}{ds}\right|\_{s = s\_{0}}\left.\dfrac{d\lambda}{ds}\right|\_{s = s\_{1}} + \left.\dfrac{dG}{ds}\right|\_{s = s\_{0}}\left.\dfrac{dG}{ds}\right|\_{s = s\_{1}}
 
 De esta definicion llegamos a que:
 
