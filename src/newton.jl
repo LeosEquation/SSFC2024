@@ -1,84 +1,104 @@
-#module TaylorNewton
+# # Método de Newton
+# Este archivo contiene las funciones correspondientes la método de Newton
+# calculado de forma vectorial en todos los casos.
 
- #   export Newton
+#-
 
-include("nonlinear_system.jl")
+"""
 
-# using TaylorSeries
+    Newton(f::Function,x0::Float64,p0::Float64)
 
-function Newton(f::Function,x0::Taylor1,p0::Union{Float64,Vector{Float64}})
-    x_new = x0
+Devuelve la raíz `x::Float64` y `p::Float64` más cercana  a los puntos `x0` y `p0` 
+de la función `f` relacionada a la ecuación diferencial.
+"""
+function Newton(f::Function,x0::Float64,p0::Float64)
+    x = x0
+    p = p0
     i = 1
-    while i <= 30 && abs(f(x_new(0.0),p0)) > 1.e-16
-        x_old = x_new
-        x_new = x_old - (f(x_old,p0)/derivative(f(x_old,p0)))(0.0)
+    while i <= 30 && abs(f(x,p)) > 1.e-16
+        df = Gradient(f,x,p)
+        x, p = [x,p] - (f(x,p)/norm(df)^2) * df
         i+=1
     end
-    return x_new(0.0)
+    return x, p
 end
 
-function Newton(f::Function,x0::Float64,p0::Taylor1)
-    p_new = p0
+#-
+
+"""
+
+    Newton(f::Function,x0::Float64,p0::Vector{Float64},indice::Int64)
+
+Devuelve la raíz `x::Float64` y `p::Vector{Float64}` más cercana  a los puntos `x0` y `p0`
+de la función `f` relacionada a la ecuación diferencial y variando solamente `p0[inidice]`.
+"""
+function Newton(f::Function,x0::Float64,p0::Vector{Float64},indice::Int64)
+    x = x0
+    p = p0
     i = 1
-    while i <= 30 && abs(f(x0,p_new(0.0))) > 1.e-16
-        p_old = p_new
-        p_new = p_old - (f(x0,p_old)/derivative(f(x0,p_old)))(0.0)
+    while i <= 30 && abs(f(x,p)) > 1.e-16
+        df = Gradient(f,x,p,indice)
+        dif_newton = [x; p] - (f(x,p)/norm(df)^2) * df
+        x = dif_newton[1]
+        p = dif_newton[2:end]
         i+=1
     end
-    return p_new(0.0)
+    return x, p
 end
 
-function Newton(f::Function,x0::Float64,p0::Vector{Taylor1{Float64}},indice::Int64)
-    p_new = p0
+#-
+
+"""
+
+    Newton(f!::Function,x0::Vector{Float64},p0::Float64)
+
+Devuelve la raíz `x::Vector{Float64}` y `p::Float64` más cercana  a los puntos `x0` y `p0` 
+del sistema de ecuaciones diferenciales asociado a la función `f!`.
+"""
+function Newton(f!::Function,x0::Vector{Float64},p0::Float64)
+    x = x0
+    p = p0
+    dx = zeros(length(x))
+    f!(dx,x,p)
     i = 1
-    while i <= 30 && abs(f(x0,p_new(0.0))) > 1.e-16
-        p_old = p_new
-        p_new = p_old - [i == indice ? (f(x0,p_old)/derivative(f(x0,p_old)))(0.0) : Taylor1(0) for i in 1:length(p0)]
+    while i <= 30 && norm(dx) > 1.e-16
+        df = Gradient(f!,x,p)
+        dif_newton = [x;p] - ((dx ⋅ dx)/norm(df)^2) * df
+        x = dif_newton[1:end-1]
+        p = dif_newton[end]
         i+=1
+        f!(dx,x,p)
     end
-    return p_new(0.0)
+    return x, p
 end
 
-function Newton(f!::Function,x0::Vector{Float64},p0::Union{Float64,Vector{Float64}},orden::Int64)
-    x_new = x0 + [Taylor1([0.0],orden) for i in 1:length(x0)]
+#-
+
+"""
+
+    Newton(f!::Function,x0::Vector{Float64},p0::Vector{Float64},indice::Int64)
+
+Devuelve la raíz `x::Vector{Float64}` y `p::Vector{Float64}` más cercana  a los puntos `x0` y `p0`
+del sistema de ecuaciones diferenciales asociado a la función `f!` y variando solamente `p0[inidice]`.
+"""
+function Newton(f!::Function,x0::Vector{Float64},p0::Vector{Float64},indice::Int64)
+    x = x0
+    p = p0
+    dx = zeros(length(x))
+    f!(dx,x,p)
     i = 1
-    dx_new = [Taylor1(0) for i in 1:length(x0)]
-    f!(dx_new,x0,p0)
-    while i <= 30 && norm(dx_new(0.0)) > 1.e-16
-        x_old = x_new
-        x_new = x_old - inv(Jacobian(f!,x_old(0.0),p0,orden))*dx_new(0.0)
+    while i <= 30 && norm(dx) > 1.e-16
+        df = Gradient(f!,x,p,indice)
+        dif_newton = [x;p] - ((dx ⋅ dx)/norm(df)^2) * df
+        x = dif_newton[1:length(x)]
+        p = dif_newton[length(x)+1:end]
         i+=1
-        f!(dx_new,x_new(0.0),p0)
+        f!(dx,x,p)
     end
-    return x_new(0.0)
+    return x, p
 end
 
-function Newton(f!::Function,x0::Vector{Float64},p0::Taylor1)
-    p_new = p0
-    i = 1
-    dx_new = [Taylor1(0) for i in 1:length(x0)]
-    f!(dx_new,x0,p0(0.0))
-    while i <= 30 && norm(dx_new(0.0)) > 1.e-16
-        p_old = p_new
-        p_new = p_old - transpose(1 ./ Jacobian(f!,x0,p_old)) * dx_new(0.0)
-        i+=1
-        f!(dx_new,x0,p_new(0.0))
-    end
-    return p_new(0.0)
-end
+#-
 
-function Newton(f!::Function,x0::Vector{Float64},p0::Vector{Taylor1{Float64}},orden::Int64,indice::Int64)
-    p_new = p0
-    i = 1
-    dx_new = [Taylor1(0) for i in 1:length(x0)]
-    f!(dx_new,x0,p0(0.0))
-    while i <= 30 && norm(dx_new(0.0)) > 1.e-16
-        p_old = p_new
-        p_newton = transpose(1 ./ Jacobian(f!,x0,p_old(0.0),orden,indice)) * dx_new(0.0)
-        p_new = p_old - [ i == indice ? p_newton : Taylor1(0) for i in 1:length(p0)]
-        i+=1
-        f!(dx_new,x0,p_new(0.0))
-    end
-    return p_new(0.0)
-end
+
 

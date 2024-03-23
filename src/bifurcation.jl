@@ -8,7 +8,7 @@ function Bifurcation_point(f::Function,x0::Float64,p0::Float64,orden::Int64)
     x_new = x0
     x, p = set_variables("x p",order = orden)
     i = 1
-    while i <= 30 && abs(Implicit_function(f,x_new,p_new,orden)) > 1.e-16
+    while i <= 30 && abs(Derivative_IFT(f,x_new,p_new,orden)) > 1.e-16
         p_old = p_new
         x_old = x_new
         x_new = Newton(f,x_old + Taylor1(orden),p_old)
