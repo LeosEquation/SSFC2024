@@ -1,25 +1,61 @@
-#module ImplicitFunction
+# # Función Implícita
+# Este archivo contiene las funciones necesarias para calcular
+# la derivada de la función implícita haciendo uso del Teorema
+# de la función Implícita.
 
-    #export Implicit_function
-include("nonlinear_system.jl")
+#-
 
-#using TaylorSeries, .NonlinearSystem
+"""
+    Derivative_IFT(f::Function, x::Float64, p::Float64)
 
-function Implicit_function(f::Function, x::Float64, p::Float64, orden::Int64)
-    return -derivative(f(x,p+Taylor1(orden)))(0.0)/derivative(f(x+Taylor1(orden),p))(0.0)
+Devuelve la derivada `x_p::Float64` de la función implícita de `f`
+evaluada en `x` y `p`.
+"""
+function Derivative_IFT(f::Function, x::Float64, p::Float64)
+    t = Taylor1(1)
+    return -derivative(f(x,p+t))(0.0)/derivative(f(x+t,p))(0.0)
 end
 
-function Implicit_function(f::Function, x::Float64, p::Vector{Float64}, orden::Int64,indice::Int64)
-    T = [i == indice ? Taylor1(orden) : Taylor1(0) for i in 1:length(p)]
-    return -derivative(f(x,p+T))(0.0)/derivative(f(x+Taylor1(orden),p))(0.0)
+#-
+
+"""
+    Derivative_IFT(f::Function, x::Float64, p::Vector{Float64},indice::Int64)
+
+Devuelve la derivada `x_p::Float64` de la función implícita de `f`
+evaluada en `x` y `p[indice]`.
+"""
+function Derivative_IFT(f::Function, x::Float64, p::Vector{Float64},indice::Int64)
+    t = Taylor1(1)
+    T = [i == indice ? t : Taylor1(0) for i in 1:length(p)]
+    return -derivative(f(x,p+T))(0.0)/derivative(f(x+t,p))(0.0)
 end
 
-function Implicit_function(f!::Function, x::Vector{Float64}, p::Float64, orden::Int64)
-    return -inv(Jacobian(f!,x,p,orden))*Jacobian(f!,x,p+Taylor1(orden))
+#-
+
+"""
+    Derivative_IFT(f!::Function, x::Vector{Float64}, p::Float64)
+
+Devuelve la derivada `x_p::Vector{Float64}` de la función implícita del sistema
+de ecuaciones diferenciales asicado a `f!` evaluada en `x` y `p`.
+"""
+function Derivative_IFT(f!::Function, x::Vector{Float64}, p::Float64)
+    J = Jacobian(f!,x,p)
+    Jx = J[:,1:end-1]
+    Jp = J[:,end]
+    return -inv(Jx)*Jp
 end
 
-function Implicit_function(f!::Function, x::Vector{Float64}, p::Vector{Float64}, orden::Int64,indice::Int64)
-    return -inv(Jacobian(f!,x,p,orden))*Jacobian(f!,x,p,orden,indice)
-end
+#-
 
-#end
+"""
+    Derivative_IFT(f!::Function, x::Vector{Float64}, p::Vector{Float64},indice::Int64)
+
+Devuelve la derivada `x_p::Vector{Float64}` de la función implícita del sistema
+de ecuaciones diferenciales asicado a `f!` evaluada en `x` y `p[indice]`.
+"""
+function Derivative_IFT(f!::Function, x::Vector{Float64}, p::Vector{Float64}, indice::Int64)
+    J = Jacobian(f!,x,p,indice)
+    Jx = J[:,1:end-1]
+    Jp = J[:,end]
+    return -inv(Jx)*Jp
+end
