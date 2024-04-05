@@ -11,12 +11,13 @@
 Devuelve las derivadas `x_s::Float64, p_s::Float64` de las variables `x` y `p` respecto 
 a la longitud de arco `s` en `x_ini` y `p_ini`.
 """
-function Derivative_arclength(f::Function,x_ini::Float64,p_ini::Float64,p_fin::Float64)
+function Derivative_arclength(f::Function,x_ini::Float64,p_ini::Float64,t::Float64,p_fin::Float64)
+    
+    p_s = 1/sqrt(Derivative_IFT(f,x_ini,p_ini,t)^2 + 1)
+    x_s = p_s*Derivative_IFT(f,x_ini,p_ini,t)
+    
 
-    x_s = 1/sqrt(1/(Derivative_IFT(f,x_ini,p_ini)^2) + 1)
-    p_s = sign(p_fin - p_ini)/sqrt(Derivative_IFT(f,x_ini,p_ini)^2 + 1)
-
-    return x_s, p_s
+    return x_s, sign(p_fin - p_ini)*p_s
 
 end
 
@@ -29,17 +30,16 @@ end
 Devuelve una aproximación numérica de las siguientes derivadas `x_s_new::Float64, p_s_new::Float64`
 respecto a la longitud de arco `s` evaluadas en `x` y `p`.
 """
-function step(f::Function,x::Float64, p::Float64, x_s::Float64,p_s::Float64)
-    t = Taylor1(1)
+function step(f::Function,x::Float64, p::Float64, t::Float64, x_s::Float64,p_s::Float64)
     
-    f_x = derivative(f(x+t,p))(0.0)
-    f_p = derivative(f(x,p+t))(0.0)
+    f_x = derivative(f(x + s,p + r, t + r))(0.0)
+    f_p = derivative(f(x + r,p + s, t + r))(0.0)
 
     A = [f_x f_p;
         x_s p_s]
 
     b = transpose([0 1])
-
+    
     x_s_new, p_s_new = A\b
 
     return x_s_new, p_s_new
@@ -54,11 +54,13 @@ end
 Devuelve las derivadas `x_s::Float64, p_s::Float64` de las variables `x` y `p[indice]` respecto 
 a la longitud de arco `s` en `x_ini` y `p_ini[indice]`.
 """
-function Derivative_arclength(f::Function,x_ini::Float64,p_ini::Vector{Float64},p_fin::Float64, indice::Int64)
-    x_s = 1/sqrt(1/(Derivative_IFT(f,x_ini,p_ini,indice)^2) + 1)
-    p_s = sign(p_fin - p_ini[indice])/sqrt(Derivative_IFT(f,x_ini,p_ini,indice)^2 + 1)
-
-    return x_s, p_s
+function Derivative_arclength(f::Function,x_ini::Float64,p_ini::Vector{Float64},t::Float64,p_fin::Float64, indice::Int64)
+    
+    p_s = 1/sqrt(Derivative_IFT(f,x_ini,p_ini,t,indice)^2 + 1)
+    x_s = p_s * Derivative_IFT(f,x_ini,p_ini,t,indice)
+    #x_s = 1/sqrt(1/(Derivative_IFT(f,x_ini,p_ini,t,indice)^2) + 1)
+    
+    return x_s, sign(p_fin - p_ini[indice])*p_s
 
 end
 
@@ -71,12 +73,10 @@ end
 Devuelve una aproximación numérica de las siguientes derivadas `x_s_new::Float64, p_s_new::Float64`
 respecto a la longitud de arco `s` evaluadas en `x` y `p[ini]`.
 """
-function step(f::Function,x_ini::Float64, p_ini::Vector{Float64}, x_s::Float64,p_s::Float64,indice::Int64)
-    t = Taylor1(1)
-    T = [i == indice ? t : Taylor1(0) for i in 1:length(p_ini)]
+function step(f::Function,x_ini::Float64, p_ini::Vector{Float64},t::Float64, x_s::Float64,p_s::Float64,indice::Int64)
 
-    f_x = derivative(f(x_ini+t,p_ini))(0.0)
-    f_p = derivative(f(x_ini,p_ini+T))(0.0)
+    f_x = derivative(f(x_ini + s, p_ini .+ r, t + r))(0.0)
+    f_p = derivative(f(x_ini .+ r, p_ini + S, t + r))(0.0)
 
     A = [f_x f_p;
         x_s p_s]
@@ -97,11 +97,11 @@ end
 Devuelve las derivadas `x_s::Vector{Float64}, p_s::Float64` de las variables `x` y `p` respecto 
 a la longitud de arco `s` en `x_ini` y `p_ini`.
 """
-function Derivative_arclength(f!::Function,x_ini::Vector{Float64},p_ini::Float64,p_fin::Float64)
+function Derivative_arclength(f!::Function,x_ini::Vector{Float64},p_ini::Float64, t::Float64,p_fin::Float64)
 
-    p_s = sign(p_fin - p_ini)/sqrt(norm(Derivative_IFT(f!,x_ini,p_ini))^2 + 1)
-    x_s = abs(p_s)*Derivative_IFT(f!,x_ini,p_ini)
-    return x_s, p_s
+    p_s = 1/sqrt(norm(Derivative_IFT(f!,x_ini,p_ini,t))^2 + 1)
+    x_s = p_s*Derivative_IFT(f!,x_ini,p_ini,t)
+    return x_s, sign(p_fin - p_ini)*p_s
 
 end
 
@@ -114,9 +114,9 @@ end
 Devuelve una aproximación numérica de las siguientes derivadas `x_s_new::Vector{Float64}, p_s_new::Float64`
 respecto a la longitud de arco `s` evaluadas en `x` y `p`.
 """
-function step(f!::Function,x::Vector{Float64}, p::Float64, x_s::Vector{Float64},p_s::Float64)
+function step(f!::Function,x::Vector{Float64}, p::Float64, t::Float64, x_s::Vector{Float64},p_s::Float64)
     
-    J = Jacobian(f!,x,p)
+    J = Jacobian(f!,x,p,t)
 
     A = [J;
         transpose(x_s) p_s]
@@ -126,8 +126,6 @@ function step(f!::Function,x::Vector{Float64}, p::Float64, x_s::Vector{Float64},
     b = [i != m ? 0.0 : 1.0 for i in 1:m]
 
     Solution = A\b
-
-    #println(Solution)
 
     return Solution[1:end-1], Solution[end]
 end
@@ -141,10 +139,10 @@ end
 Devuelve las derivadas `x_s::Vector{Float64}, p_s::Float64` de las variables `x` y `p[indice]` respecto 
 a la longitud de arco `s` en `x_ini` y `p_ini[indice]`.
 """
-function Derivative_arclength(f!::Function,x_ini::Vector{Float64},p_ini::Vector{Float64},p_fin::Float64, indice::Int64)
-    p_s = sign(p_fin - p_ini[indice])/sqrt(norm(Derivative_IFT(f!,x_ini,p_ini,indice))^2 + 1)
-    x_s = abs(p_s)*Derivative_IFT(f!,x_ini,p_ini,indice)
-    return x_s, p_s
+function Derivative_arclength(f!::Function,x_ini::Vector{Float64},p_ini::Vector{Float64},t::Float64,p_fin::Float64, indice::Int64)
+    p_s = 1/sqrt(norm(Derivative_IFT(f!,x_ini,p_ini,t,indice))^2 + 1)
+    x_s = p_s*Derivative_IFT(f!,x_ini,p_ini,t,indice)
+    return x_s, sign(p_fin - p_ini[indice])*p_s
 
 end
 
@@ -158,9 +156,9 @@ Devuelve una aproximación numérica de las siguientes derivadas `x_s_new::Vecto
 respecto a la longitud de arco `s` evaluadas en `x` y `p[ini]`.
 """
 
-function step(f!::Function,x::Vector{Float64}, p::Vector{Float64}, x_s::Vector{Float64},p_s::Float64,indice::Int64)
+function step(f!::Function,x::Vector{Float64}, p::Vector{Float64}, t::Float64, x_s::Vector{Float64},p_s::Float64,indice::Int64)
 
-    J = Jacobian(f!,x,p,indice)
+    J = Jacobian(f!,x,p,t,indice)
 
     A = [J;
         transpose(x_s) p_s]
@@ -170,8 +168,6 @@ function step(f!::Function,x::Vector{Float64}, p::Vector{Float64}, x_s::Vector{F
     b = [i != m ? 0.0 : 1.0 for i in 1:m]
 
     Solution = A\b
-
-    #println(Solution)
 
     return Solution[1:end-1], Solution[end]
 end

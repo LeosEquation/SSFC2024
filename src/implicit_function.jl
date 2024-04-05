@@ -11,9 +11,8 @@
 Devuelve la derivada `x_p::Float64` de la función implícita de `f`
 evaluada en `x` y `p`.
 """
-function Derivative_IFT(f::Function, x::Float64, p::Float64)
-    t = Taylor1(1)
-    return -derivative(f(x,p+t))(0.0)/derivative(f(x+t,p))(0.0)
+function Derivative_IFT(f::Function, x::Float64, p::Float64,t::Float64)
+    return -derivative(f(x+r,p+s,t+r))(0.0)/derivative(f(x+s,p+r,t+r))(0.0)
 end
 
 #-
@@ -24,10 +23,8 @@ end
 Devuelve la derivada `x_p::Float64` de la función implícita de `f`
 evaluada en `x` y `p[indice]`.
 """
-function Derivative_IFT(f::Function, x::Float64, p::Vector{Float64},indice::Int64)
-    t = Taylor1(1)
-    T = [i == indice ? t : Taylor1(0) for i in 1:length(p)]
-    return -derivative(f(x,p+T))(0.0)/derivative(f(x+t,p))(0.0)
+function Derivative_IFT(f::Function, x::Float64, p::Vector{Float64},t::Float64,indice::Int64)
+    return -derivative(f(x+r,p+S,t+r))(0.0)/derivative(f(x+s,p .+ r,t+r))(0.0)
 end
 
 #-
@@ -38,8 +35,8 @@ end
 Devuelve la derivada `x_p::Vector{Float64}` de la función implícita del sistema
 de ecuaciones diferenciales asicado a `f!` evaluada en `x` y `p`.
 """
-function Derivative_IFT(f!::Function, x::Vector{Float64}, p::Float64)
-    J = Jacobian(f!,x,p)
+function Derivative_IFT(f!::Function, x::Vector{Float64}, p::Float64,t::Float64)
+    J = Jacobian(f!,x,p,t)
     Jx = J[:,1:end-1]
     Jp = J[:,end]
     return -inv(Jx)*Jp
@@ -53,8 +50,8 @@ end
 Devuelve la derivada `x_p::Vector{Float64}` de la función implícita del sistema
 de ecuaciones diferenciales asicado a `f!` evaluada en `x` y `p[indice]`.
 """
-function Derivative_IFT(f!::Function, x::Vector{Float64}, p::Vector{Float64}, indice::Int64)
-    J = Jacobian(f!,x,p,indice)
+function Derivative_IFT(f!::Function, x::Vector{Float64}, p::Vector{Float64},t::Float64, indice::Int64)
+    J = Jacobian(f!,x,p,t,indice)
     Jx = J[:,1:end-1]
     Jp = J[:,end]
     return -inv(Jx)*Jp

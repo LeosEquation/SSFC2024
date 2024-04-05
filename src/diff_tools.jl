@@ -11,9 +11,8 @@
 Devuelve el gradiente `∇f::Vector{Float64}` de la función `f` evaluado
 en `x` y `p`.
 """
-function Gradient(f::Function,x::Float64,p::Float64)
-    t = Taylor1(1)
-    return [derivative(f(x+t,p))(0.0),derivative(f(x,p+t))(0.0)]
+function Gradient(f::Function,x::Float64,p::Float64,t::Float64)
+    return [derivative(f(x+s,p+r,t+r))(0.0),derivative(f(x+r,p+s,t+r))(0.0)]
 end
 
 #-
@@ -24,10 +23,8 @@ end
 Devuelve el gradiente `∇f::Vector{Float64}` de la función `f` evaluado
 en `x` y `p[indice]`.
 """
-function Gradient(f::Function,x::Float64,p::Vector{Float64},indice::Int64)
-    t = Taylor1(1)
-    T = [i == indice ? t : Taylor1(0) for i in 1:length(p)]
-    return [derivative(f(x+t,p))(0.0); [i == indice ? derivative(f(x,p+T))(0.0) : 0.0 for i in 1:length(p)]]
+function Gradient(f::Function,x::Float64,p::Vector{Float64},t::Float64,indice::Int64)
+    return [derivative(f(x+s,p .+ r,t+r))(0.0); [i == indice ? derivative(f(x+r,p+S,t+r))(0.0) : 0.0 for i in 1:length(p)]]
 end
 
 #-
@@ -38,17 +35,15 @@ end
 Devuelve el gradiente `∇||f||::Vector{Float64}` de la norma del sistema
 de ecuaciones diferenciales asociado a función `f!` evaluado en `x` y `p`.
 """
-function Gradient(f!::Function,x::Vector{Float64},p::Float64)
-    t = Taylor1(1)
-    s = Taylor1([0.0,0.0],1)
-    dx = [s for i in 1:length(x)]
+function Gradient(f!::Function,x::Vector{Float64},p::Float64,t::Float64)
+    dx = [r for i in 1:length(x)]
     G = zeros(length(x) + 1)
     for i in 1:length(x)
-        f!(dx,x + [i == j ? t : s for j in 1:length(x)],p)
+        f!(dx,x + [i == j ? s : r for j in 1:length(x)],p + r, t + r)
         G[i] = derivative(dx ⋅ dx)(0.0)
     end
-    f!(dx,x,p + t)
-    G[end] = (dx ⋅ dx)(0.0)
+    f!(dx,x .+ r,p + s, t + r)
+    G[end] = derivative(dx ⋅ dx)(0.0)
     return G
 end
 
@@ -60,22 +55,21 @@ end
 Devuelve el gradiente `∇||f||::Vector{Float64}` de la norma del sistema
 de ecuaciones diferenciales asociado a función `f!` evaluado en `x` y `p[indice]`.
 """
-function Gradient(f!::Function,x::Vector{Float64},p::Vector{Float64},indice::Int64)
+function Gradient(f!::Function,x::Vector{Float64},p::Vector{Float64},t::Float64,indice::Int64)
 
-    t = Taylor1(1)
-    s = Taylor1([0.0,0.0],1)
-    dx = [s for i in 1:length(x)]
+    S = [i == indice ? s : r for i in 1:length(p_ini)]
+
+    dx = [r for i in 1:length(x)]
     Gx = zeros(length(x))
     Gp = zeros(length(p))
-    T = [i == indice ? t : s for i in 1:length(p)]
 
     for i in 1:length(x)
-        f!(dx,x + [i == j ? t : s for j in 1:length(x)],p)
+        f!(dx,x + [i == j ? s : r for j in 1:length(x)],p .+ r, t + r)
         Gx[i] = derivative(dx ⋅ dx)(0.0)
     end
 
     for i in 1:length(p)
-        f!(dx,x,p + T)
+        f!(dx,x .+ r,p + S, t + r)
         if i == indice
             Gp[i] = derivative(dx ⋅ dx)(0.0)
         end
@@ -92,18 +86,17 @@ end
 Devuelve el jacobiano `J::Matrix{FLoat64}` del sistema de ecuaciones diferenciales
 asociado a `f!` evaluado en `x` y `p`.
 """
-function Jacobian(f!::Function, x::Vector{Float64}, p::Float64)
-    s = Taylor1([0.0,0.0],1) 
-    t = Taylor1(1)
+function Jacobian(f!::Function, x::Vector{Float64}, p::Float64,t::Float64)
+
     J = zeros(length(x),length(x) + 1)
-    dx = [s for i in 1:length(x)]
+    dx = [r for i in 1:length(x)]
     for i in 1:length(x)
         for j in 1:length(x)
-            f!(dx,x + [j == k ? t : s for k in 1:length(x)],p)
-            J[i,j] = derivative(dx[i] .+ s)(0.0)
+            f!(dx,x + [j == k ? s : r for k in 1:length(x)],p + r, t + r)
+            J[i,j] = derivative(dx[i])(0.0)
         end
-        f!(dx,x,p + t)
-        J[i,end] = derivative(dx[i] .+ s)(0.0)
+        f!(dx,x .+ r,p + s,t + r)
+        J[i,end] = derivative(dx[i])(0.0)
     end
     return J
 end
@@ -116,19 +109,30 @@ end
 Devuelve el jacobiano `J::Matrix{FLoat64}` del sistema de ecuaciones diferenciales
 asociado a `f!` evaluado en `x` y `p[indice]`.
 """
-function Jacobian(f!::Function, x::Vector{Float64}, p::Vector{Float64}, indice::Int64)
-    s = Taylor1([0.0,0.0],1) 
-    t = Taylor1(1)
-    T = [i == indice ? t : s for i in 1:length(p)]
+function Jacobian(f!::Function, x::Vector{Float64}, p::Vector{Float64},t::Float64, indice::Int64)
+    S = [i == indice ? s : r for i in 1:length(p_ini)]
     J = zeros(length(x),length(x) + 1)
     dx = [s for i in 1:length(x)]
     for i in 1:length(x)
         for j in 1:length(x)
-            f!(dx,x + [j == k ? t : s for k in 1:length(x)],p)
-            J[i,j] = derivative(dx[i] .+ s)(0.0)
+            f!(dx,x + [j == k ? s : r for k in 1:length(x)],p .+ r,t + r)
+            J[i,j] = derivative(dx[i])(0.0)
         end
-        f!(dx,x,p + T)
-        J[i,end] = derivative(dx[i] .+ s)(0.0)
+        f!(dx,x .+ r,p + S,t + r)
+        J[i,end] = derivative(dx[i] )(0.0)
     end
     return J
+end
+
+function Hessian(f!::Function, x::Vector{Float64}, p::Float64,t::Float64)
+    S = set_variables("s", numvars = (length(x) + 1), order = 2)
+    dx = x .+ S[1:end-1]
+    H = zeros(length(x) + 1,length(x) + 1)
+    for i in 1:length(x) + 1
+        for j in 1:length(x) + 1
+            f!(dx,x .+ S[1:end-1],p + S[end],t)
+            H[i,j] = derivative(derivative(dx ⋅ dx,i),j)(zeros(length(x) + 1))
+        end
+    end
+    return H
 end

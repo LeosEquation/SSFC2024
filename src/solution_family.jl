@@ -9,6 +9,11 @@ using TaylorSeries, LinearAlgebra
 
 #-
 
+s = Taylor1(1)
+r = Taylor1([0.0,0.0],1)
+
+#-
+
 include("diff_tools.jl")
 include("implicit_function.jl")
 include("newton.jl")
@@ -28,7 +33,7 @@ es el dominio de la rama de solución correspondiente a las condiciones iniciale
 dadas y `X` es la imagen los valores de `P`, entendiendo que `x(p)` con `x ∈ X` y `p ∈ P` es tal que 
 `f(x(p),p) ≈ 0.0`.
 """
-function Solution_family(f::Function, x_ini::Float64, p_ini::Float64, Δs::Float64, p_fin::Float64; N = 10000)
+function Solution_family(f::Function, x_ini::Float64, p_ini::Float64, t::Float64, Δs::Float64, p_fin::Float64; N = 10000)
         
     X = Float64[]
     P = Float64[]
@@ -36,12 +41,11 @@ function Solution_family(f::Function, x_ini::Float64, p_ini::Float64, Δs::Float
     push!(P,p_ini)
     push!(X,x_ini)
 
-    x_s, p_s = Derivative_arclength(f, x_ini, p_ini, p_fin)
-    x_s, p_s = step(f, x_ini, p_ini, x_s, p_s)
+    x_s, p_s = Derivative_arclength(f, x_ini, p_ini, t, p_fin)
     x = x_ini + x_s*Δs
     p = p_ini + p_s*Δs
 
-    x, p = Newton(f,x,p)
+    x, p = Newton(f,x,p,t)
 
     push!(P,p)
     push!(X,x)
@@ -49,15 +53,12 @@ function Solution_family(f::Function, x_ini::Float64, p_ini::Float64, Δs::Float
     i = 0
 
     while p_ini <= p <= p_fin && i <= N 
-        x_s, p_s = step(f, x+x_s*Δs, p+p_s*Δs, x_s, p_s)
-        x, p = Newton(f,x + Δs*x_s,p + Δs*p_s)
+        x_s, p_s = step(f, x+x_s*Δs, p+p_s*Δs, t, x_s, p_s)
+        x, p = Newton(f,x + Δs*x_s,p + Δs*p_s, t)
         push!(P,p)
         push!(X,x)
         i+=1  
     end
-
-    println("\n Para la familia de soluciones con valores iniciales x_ini = $(x_ini) y p_ini = $(p_ini)")
-    println(" el máximo valor de la función es $(maximum(f.(X[1:end-1],P[1:end-1]))) \n ")
 
     return P,X
 
@@ -73,8 +74,10 @@ es el dominio de la rama de solución correspondiente a las condiciones iniciale
 dadas y `X` es la imagen los valores de `P`, entendiendo que `x(p)` con `x ∈ X` y `p ∈ P` es tal que 
 `f(x(p),p') ≈ 0.0` donde `p'[indice] = p`.
 """
-function Solution_family(f::Function, x_ini::Float64, p_ini::Vector{Float64}, Δs::Float64, p_fin::Float64,indice::Int64; N = 10000)
-        
+function Solution_family(f::Function, x_ini::Float64, p_ini::Vector{Float64}, t::Float64, Δs::Float64, p_fin::Float64,indice::Int64; N = 10000)
+    
+    S = [i == indice ? s : r for i in 1:length(p_ini)]
+
     X = Float64[]
     P = Float64[]
 
@@ -85,11 +88,11 @@ function Solution_family(f::Function, x_ini::Float64, p_ini::Vector{Float64}, Δ
     push!(P,p_ini[indice])
     push!(X,x_ini)
 
-    x_s, p_s = Derivative_arclength(f, x_ini, p_ini, p_fin,indice)
+    x_s, p_s = Derivative_arclength(f, x_ini, p_ini, t, p_fin, indice)
     x = x_ini + x_s*Δs
     p = p_ini + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)]
 
-    x, p = Newton(f,x,p,indice)
+    x, p = Newton(f,x,p,t,indice)
     push!(P,p[indice])
     push!(X,x)
     
@@ -97,16 +100,12 @@ function Solution_family(f::Function, x_ini::Float64, p_ini::Vector{Float64}, Δ
     i = 0
 
     while p_ini[indice] <= p[indice] <= p_fin && i <= N
-        x_s, p_s = step(f!, x + x_s*Δs, p + p_s*Δs, x_s, p_s,indice)
-        x, p = Newton(f,x + Δs*x_s,p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)],indice)
+        x_s, p_s = step(f!, x + x_s*Δs, p + p_s*Δs, t, x_s, p_s,indice)
+        x, p = Newton(f,x + Δs*x_s,p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)], t,indice)
         push!(P,p[indice])
         push!(X,x)
         i+=1  
     end
-
-    println("\n Para la familia de soluciones con valores iniciales x_ini = $(x_ini) y p_ini = $(p_ini)")
-    println(" el máximo valor de la función es $(maximum(f.(X[1:end-1],P[1:end-1]))) \n ")
-
 
     return P,X
 
@@ -129,7 +128,7 @@ dadas y `X` es la imagen los valores de `P`, entendiendo que `x(p)` con `x ∈ X
         norm(dx) ≈ 0.0
 
 """
-function Solution_family(f!::Function, x_ini::Vector{Float64}, p_ini::Float64, Δs::Float64, p_fin::Float64; N = 10000)
+function Solution_family(f!::Function, x_ini::Vector{Float64}, p_ini::Float64, t::Float64, Δs::Float64, p_fin::Float64; N = 10000)
         
     X = Vector{Float64}[]
     P = Float64[]
@@ -137,12 +136,12 @@ function Solution_family(f!::Function, x_ini::Vector{Float64}, p_ini::Float64, �
     push!(P,p_ini)
     push!(X,x_ini)
 
-    x_s, p_s = Derivative_arclength(f!, x_ini, p_ini, p_fin)
+    x_s, p_s = Derivative_arclength(f!, x_ini, p_ini, t, p_fin)
     x = x_ini + x_s*Δs
     p = p_ini + p_s*Δs
 
     
-    x, p = Newton(f!,x,p)
+    x, p = Newton(f!,x,p,t)
 
     push!(P,p)
     push!(X,x)
@@ -150,26 +149,14 @@ function Solution_family(f!::Function, x_ini::Vector{Float64}, p_ini::Float64, �
     i = 0
 
     while p_ini <= p <= p_fin && i <= N
-        x_s, p_s = step(f!, x + x_s*Δs, p + p_s*Δs, x_s, p_s)
-        x, p = Newton(f!,x + x_s*Δs, p + p_s*Δs)
+        x_s, p_s = step(f!, x + x_s*Δs, p + p_s*Δs, t, x_s, p_s)
+        x, p = Newton(f!,x + x_s*Δs, p + p_s*Δs, t)
         push!(P,p)
         push!(X,x)
         i+=1  
     end
 
-    normas = Float64[]
-
-    for i in 1:length(P[1:end-1])
-        dx = zeros(length(x))
-        f!(dx,X[1:end-1][i],P[1:end-1][i])
-        push!(normas,norm(dx))
-    end
-
-    println("\n Para la familia de soluciones con valores iniciales x_ini = $(x_ini) y p_ini = $(p_ini)")
-    println(" el máximo valor de la función es $(maximum(normas)) \n ")
-
-
-    return P[1:end-1],X[1:end-1]
+    return P,X
 
 end
 
@@ -187,8 +174,10 @@ dadas y `X` es la imagen los valores de `P`, entendiendo que `x(p)` con `x ∈ X
 
 donde `p'[indice] = p`
 """
-function Solution_family(f!::Function, x_ini::Vector{Float64}, p_ini::Vector{Float64}, Δs::Float64, p_fin::Float64,indice::Int64; tol = 1.e-16, N = 10000)
-        
+function Solution_family(f!::Function, x_ini::Vector{Float64}, p_ini::Vector{Float64}, t::Float64, Δs::Float64, p_fin::Float64,indice::Int64; tol = 1.e-16, N = 10000)
+    
+    S = [i == indice ? s : r for i in 1:length(p_ini)]
+
     X = Vector{Float64}[]
     P = Float64[]
 
@@ -199,37 +188,27 @@ function Solution_family(f!::Function, x_ini::Vector{Float64}, p_ini::Vector{Flo
     push!(P,p_ini[indice])
     push!(X,x_ini)
 
-    x_s, p_s = Derivative_arclength(f!, x_ini, p_ini, p_fin,indice)
+    x_s, p_s = Derivative_arclength(f!, x_ini, p_ini, t, p_fin,indice)
 
     x = x_ini + x_s*Δs
     p = p_ini + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)]
     
-    x, p = Newton(f!,x,p,indice)
+    x, p = Newton(f!,x,p,t,indice)
+
+    push!(P,p[indice])
+    push!(X,x)
 
     i = 0
 
     while p_ini[indice] <= p[indice] <= p_fin && i <= N
-        x_s, p_s = step(f!, x + x_s*Δs, p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)], x_s, p_s,indice)
-        x, p = Newton(f!,x + x_s*Δs,p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)],indice)
+        x_s, p_s = step(f!, x + x_s*Δs, p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)], t, x_s, p_s,indice)
+        x, p = Newton(f!,x + x_s*Δs,p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)], t,indice)
         push!(P,p[indice])
         push!(X,x)
         i+=1  
     end
 
-    normas = Float64[]
-
-    for i in 1:length(P[1:end-1])
-        dx = zeros(length(x))
-        f!(dx,X[1:end-1][i],p_ini + [j == indice ? P[1:end-1][i] : 0.0 for j in 1:length(p_ini)])
-        push!(normas,norm(dx))
-    end
-
-    println("\n Para la familia de soluciones con valores iniciales x_ini = $(x_ini) y p_ini = $(p_ini)")
-    println(" el máximo valor de la función es $(maximum(normas)) \n ")
-    
-
-
-    return P[1:end-1],X[1:end-1]
+    return P,X
 
 end
 
