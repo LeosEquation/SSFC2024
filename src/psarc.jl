@@ -6,7 +6,7 @@
 
 """
 
-    Derivative_arclength(f::Function,x_ini::Float64,p_ini::Float64,p_fin::Float64)
+    Derivative_arclength(f::Function,x_ini::Float64,p_ini::Float64,t::Float64,p_fin::Float64)
 
 Devuelve las derivadas `x_s::Float64, p_s::Float64` de las variables `x` y `p` respecto 
 a la longitud de arco `s` en `x_ini` y `p_ini`.
@@ -25,7 +25,7 @@ end
 
 """
 
-    step(f::Function,x::Float64, p::Float64, x_s::Float64,p_s::Float64)
+    step(f::Function,x::Float64, p::Float64, t::Float64, x_s::Float64,p_s::Float64)
 
 Devuelve una aproximación numérica de las siguientes derivadas `x_s_new::Float64, p_s_new::Float64`
 respecto a la longitud de arco `s` evaluadas en `x` y `p`.
@@ -49,7 +49,7 @@ end
 
 """
 
-    Derivative_arclength(f::Function,x_ini::Float64,p_ini::Vector{Float64},p_fin::Float64,indice::Int64)
+    Derivative_arclength(f::Function,x_ini::Float64,p_ini::Vector{Float64},t::Float64,p_fin::Float64,indice::Int64)
 
 Devuelve las derivadas `x_s::Float64, p_s::Float64` de las variables `x` y `p[indice]` respecto 
 a la longitud de arco `s` en `x_ini` y `p_ini[indice]`.
@@ -58,7 +58,6 @@ function Derivative_arclength(f::Function,x_ini::Float64,p_ini::Vector{Float64},
     
     p_s = 1/sqrt(Derivative_IFT(f,x_ini,p_ini,t,indice)^2 + 1)
     x_s = p_s * Derivative_IFT(f,x_ini,p_ini,t,indice)
-    #x_s = 1/sqrt(1/(Derivative_IFT(f,x_ini,p_ini,t,indice)^2) + 1)
     
     return x_s, sign(p_fin - p_ini[indice])*p_s
 
@@ -68,7 +67,7 @@ end
 
 """
 
-    step(f::Function,x::Float64, p::Float64, x_s::Float64,p_s::Vector{Float64},indice::Int64)
+    step(f::Function,x::Float64, p::Float64, t::Float64, x_s::Float64,p_s::Vector{Float64},indice::Int64)
 
 Devuelve una aproximación numérica de las siguientes derivadas `x_s_new::Float64, p_s_new::Float64`
 respecto a la longitud de arco `s` evaluadas en `x` y `p[ini]`.
@@ -92,7 +91,7 @@ end
 
 """
 
-    Derivative_arclength(f::Function,x_ini::Vector{Float64},p_ini::Float64,p_fin::Float64)
+    Derivative_arclength(f::Function,x_ini::Vector{Float64},p_ini::Float64,t::Float64,p_fin::Float64)
 
 Devuelve las derivadas `x_s::Vector{Float64}, p_s::Float64` de las variables `x` y `p` respecto 
 a la longitud de arco `s` en `x_ini` y `p_ini`.
@@ -109,7 +108,7 @@ end
 
 """
 
-    step(f::Function,x::Vector{Float64}, p::Float64, x_s::Float64,p_s::Float64)
+    step(f::Function,x::Vector{Float64}, p::Float64, t::Float64, x_s::Float64,p_s::Float64)
 
 Devuelve una aproximación numérica de las siguientes derivadas `x_s_new::Vector{Float64}, p_s_new::Float64`
 respecto a la longitud de arco `s` evaluadas en `x` y `p`.
@@ -134,7 +133,7 @@ end
 
 """
 
-    Derivative_arclength(f::Function,x_ini::Vector{Float64},p_ini::Vector{Float64},p_fin::Float64,indice::Int64)
+    Derivative_arclength(f::Function,x_ini::Vector{Float64},p_ini::Vector{Float64},t::Float64,p_fin::Float64,indice::Int64)
 
 Devuelve las derivadas `x_s::Vector{Float64}, p_s::Float64` de las variables `x` y `p[indice]` respecto 
 a la longitud de arco `s` en `x_ini` y `p_ini[indice]`.
@@ -150,7 +149,7 @@ end
 
 """
 
-    step(f::Function,x::Vector{Float64}, p::Float64, x_s::Vector{Float64},p_s::Vector{Float64},indice::Int64)
+    step(f::Function,x::Vector{Float64}, p::Float64, t::Float64, x_s::Vector{Float64},p_s::Vector{Float64},indice::Int64)
 
 Devuelve una aproximación numérica de las siguientes derivadas `x_s_new::Vector{Float64}, p_s_new::Float64`
 respecto a la longitud de arco `s` evaluadas en `x` y `p[ini]`.
@@ -174,3 +173,14 @@ end
 
 #-
 
+# ### Referencias
+
+#-
+
+# - Doedel, E.J. (2007). Lecture Notes on Numerical Analysis of Nonlinear Equations.
+#   In: Krauskopf, B., Osinga, H.M., Galán-Vioque, J. (eds) Numerical Continuation 
+#   Methods for Dynamical Systems. Understanding Complex Systems. Springer, Dordrecht. 
+#   https://doi.org/10.1007/978-1-4020-6356-5_1
+#
+# - https://math.stackexchange.com/questions/1415898/pseudo-arclength-continuation-scheme
+#
