@@ -38,6 +38,36 @@ end
 #-
 
 """
+    Bifurcation_point(f::Function,x0::Float64,p0::Float64,t::Float64; type_bif = false)
+
+Esta función devuelve el punto de bifurcación `p::Float64, x::Float64` más cercano a `x0` y `p0`
+de la ecuación diferencial descrita por `f`. Si `type_bif = true` se imprimirá el tipo de bifurcación.
+"""
+function Bifurcation_point(f!::Function,x0::Vector{Float64},p0::Float64,t::Float64; type_bif = false)
+    S = set_variables("s",numvars = length(x0)+1,order = 3)
+    x = x0 + S[1:end-1]
+    p = p0 + S[end]
+    ceros = zeros(length(x0)+1)
+    dx = x
+    f!(dx,x,p,t)
+
+    J = [derivative(dx[i],j) for i in 1:length(x), j in 1:length(x)]
+
+    Bif_vec(x,p,t) = [f(x,p,t),]
+    i = 1
+    while i <= 30 && norm(Bif_vec(x,p,t)(ceros)) > 1.e-16
+        x, p = [x,p] - inv(TaylorSeries.jacobian(Bif_vec(x,p,t),ceros))*Bif_vec(x,p,t)(ceros)
+        i += 1
+    end
+    if type_bif
+        Type_Bifurcation(f,x,p,t,ceros)
+    end
+    return p(ceros), x(ceros)
+end
+
+#-
+
+"""
     Bifurcation_point(f::Function,x0::Float64,p0::Float64,t::Float64,indice::Int64; type_bif = false)
 
 Esta función devuelve el punto de bifurcación `p[indice]::Float64, x::Float64` más cercano a `x0` y `p0[indice]`

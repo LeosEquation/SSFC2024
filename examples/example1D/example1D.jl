@@ -61,3 +61,28 @@ begin
 end;
 
 #-
+
+A = [rand() for i in 1:3,j in 1:3]
+
+det(A)
+
+L, U, P = factorize(A)
+
+
+L
+U
+P
+
+A
+
+P
+
+[i == j ? 1 : 0 for i in 1:length(P), j in P]*L*U
+
+-det(U)
+
+det([i == j ? 1 : 0 for i in 1:length(P), j in P])
+
+det(L)
+
+det(A)

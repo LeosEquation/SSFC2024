@@ -121,3 +121,104 @@ begin
         savefig("PrecisiónRama$(i).png")
     end
 end
+
+#-
+
+function J(f!,x0,p0,t)
+    S = set_variables("x", numvars = 3, order = 3)
+
+    x = x0 + S[1:end-1]
+    p = p0 + S[end]
+
+    dx = x
+
+    f!(dx,x,p,t)
+
+    return [derivative(dx[i],j) for i in 1:length(x), j in 1:length(x)+1]
+end
+
+function M(f!,x0,p0,t)
+
+    A = J(f!,x0,p0,t)(zeros(length(x0)+1))[:,1:length(x0)]
+    i = findmin(norm.(eigvals(A)))[2]
+    j = findmin(norm.(eigvals(transpose(A))))[2]
+
+    B = eigvecs(transpose(A))[:,j]
+    C = eigvecs(A)[:,i]
+
+    return [A B; transpose(C) 0.0]
+
+end
+
+G(f!,x0,p0,t) = (M(f!,x0,p0,t)\[zeros(length(x0)); 1.0])[end]
+
+function dG(f!,x0,p0,t) 
+    Ai(i)= derivative.(J(f!,x0,p0,t)[:,1:length(x0)],i)(zeros(length(x0)+1))
+    dGi(i) = (M(f!,x0,p0,t)\(-[Ai(i) zeros(length(x0)) ; transpose(zeros(length(x0))) 0.0]*(M(f!,x0,p0,t)\[zeros(length(x0)); 1.0])))[end]
+    return [dGi(i) for i in 1:length(x0)+1]
+end
+
+function F(f!,x0,p0,t)
+    dx = x0
+    f!(dx,x0,p0,t)
+    return [dx ; G(f!,x0,p0,t)]
+end
+
+dF(f!,x0,p0,t) = [J(f!,x0,p0,t)(zeros(length(x0)+1)) ; transpose(dG(f!,x0,p0,t))]
+
+prueba = Equilibrium(f!, x_ini[2], p_ini, t, 0.001, p_fin; N = 10000)
+
+Jac = [J(f!,prueba[2][i],prueba[1][i],t)(zeros(3))[:,1:2] for i in 1:length(prueba[1])]
+
+realeig1 = [real(eigvals(j)[1]) for j in Jac]
+imageig1 = [imag(eigvals(j)[1]) for j in Jac]
+
+realeig2 = [real(eigvals(j)[2]) for j in Jac]
+imageig2 = [imag(eigvals(j)[2]) for j in Jac]
+
+plot(prueba[1],[realeig1,imageig1])
+
+plot(prueba[1],[realeig2,imageig2])
+
+for i in 1:length(prueba[1])-1
+    if realeig2[i]*realeig2[i+1] <= 0.0 && imageig2[i]*imageig2[i+1] <= 0.0
+        println(i)
+    end
+end
+
+realeig2[1074]
+imageig2[1074]
+
+x0 = prueba[2][1557]
+p0 = prueba[1][1557]
+
+x = x0
+p = p0
+
+eigvalor, j = findmin(norm.(eigvals(M(f!,x,p,t)[1:2,1:2])))
+
+eigvecs(M(f!,x,p,t)[1:2,1:2])[:,j]
+
+
+F(f!,x,p,t)
+dF(f!,x,p,t)
+
+i = 1
+
+while i <= 30 && norm(F(f!,x,p,t)) > 1.e-16
+    println("Paso $(i): λ = $(p), x = $(x)")
+    println("\n")
+    show(stdout, "text/plain", dF(f!,x,p,t))
+    println("\n")
+    show(stdout, "text/plain", F(f!,x,p,t))
+    println("\n")
+    X = [x;p] - inv(dF(f!,x,p,t))*F(f!,x,p,t)
+    x = X[1:end-1]
+    p = X[end]
+    i += 1
+end
+
+G(f!,x,p,t)
+dF(f!,x,p,t)
+
+x, p
