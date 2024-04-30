@@ -1,6 +1,8 @@
-include("../../src/equilibrium.jl");
-include("../../src/bifurcation.jl");
-include("../../src/stability.jl");
+cd("/home/laboratoriocomputo3/SSFC2024/src/");
+include("equilibrium.jl");
+include("bifurcation.jl");
+include("stability.jl");
+cd("/home/laboratoriocomputo3/SSFC2024/examples/Predator-Prey model");
 using Plots;
 
 #-
@@ -135,6 +137,32 @@ function J(f!,x0,p0,t)
     f!(dx,x,p,t)
 
     return [derivative(dx[i],j) for i in 1:length(x), j in 1:length(x)+1]
+end
+
+function Big_J(f!,x,p,ν0,t)
+    n = length(x)
+    ceros = zeros(n+1)
+    JMatrix = J(f!,x,p,t)
+    
+    A = JMatrix(ceros)[:,1:end-1]
+    B = JMatrix(ceros)[:,end]
+    C = [0.0 for i in 1:n, j in 1:n]
+    
+    ν = eigvecs(A)[:,1]
+    
+    D = [sum([derivative(JMatrix[i,k],j)(ceros)*ν[k] for k in 1:n]) for i in 1:n, j in 1:n]
+    E = [sum([derivative(JMatrix[i,k],n+1)(ceros)*ν[k] for k in 1:n]) for i in 1:n]
+    F = A
+    
+    G = transpose(zeros(n))
+    H = 0.0
+    I = transpose(ν0)
+    
+    BJ = [A B C;
+          D E F;
+          G H I]
+    
+    return BJ
 end
 
 function M(f!,x0,p0,t)
