@@ -137,7 +137,6 @@ function Equilibrium(f!::Function, x_ini::Vector{Float64}, p_ini::Float64, t::Fl
     push!(X,x_ini)
 
     x_s, p_s = Derivative_arclength(f!, x_ini, p_ini, t, p_fin)
-    x_s, p_s = step(f!, x_ini + x_s*Δs, p_ini + p_s*Δs, t, x_s, p_s)
 
     x = x_ini + x_s*Δs
     p = p_ini + p_s*Δs
