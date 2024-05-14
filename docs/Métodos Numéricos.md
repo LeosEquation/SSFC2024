@@ -21,13 +21,13 @@ F\_{\textbf{x}}(\textbf{x}\_{i+1},p\_{i+1}) & F\_{p}(\textbf{x}\_{i+1},p\_{i+1})
 \end{pmatrix}
 \begin{pmatrix} 
 \left.\dfrac{d\textbf{x}}{ds}\right|\_{s\_{+1}} \\\ \left.\dfrac{dp}{ds}\right|\_{s\_{i+1}}
-\end{pmatrix}
+\end{pmatrix} = 
 \begin{pmatrix} 
 \textbf{0} \\\ 1
 \end{pmatrix}
 $$
 
-Con esto, podemos asociar $\Delta \textbf{x}\_{i+1} = \left.\dfrac{d\textbf{x}}{ds}\right|_{s\_{+1}}$ y $\Delta p\_{i+1} = \left.\dfrac{dp}{ds}\right|_{s\_{+1}}$ y de esta manera tener $\textbf{x}\_{i+2} = \textbf{x}\_{i+1} + \Delta \textbf{x}\_{i+1}$ y $p\_{i+2} = p\_{i+1} + \Delta p\_{i+1}$.
+Con esto, podemos asociar $\Delta \textbf{x}\_{i+1} = \left.\dfrac{d\textbf{x}}{ds}\right|\_{s\_{+1}}$ y $\Delta p\_{i+1} = \left.\dfrac{dp}{ds}\right|\_{s\_{+1}}$ y de esta manera tener $\textbf{x}\_{i+2} = \textbf{x}\_{i+1} + \Delta \textbf{x}\_{i+1}$ y $p\_{i+2} = p\_{i+1} + \Delta p\_{i+1}$.
 
 Para obtener el paso inicial $i = 0$, se utiliza la derivada de la función implícita explicada en el documento de antecedentes.
 
