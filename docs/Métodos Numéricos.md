@@ -18,7 +18,7 @@ La solución a este sistema [Doedel] nos proporciona este sistema de ecuaciones 
 $$
 \left(\begin{pmatrix}
 F\_{\textbf{x}}(\textbf{x}\_{i+1},p\_{i+1}) & F\_{p}(\textbf{x}\_{i+1},p\_{i+1}) \\ \left.\dfrac{d\textbf{x}}{ds}\right|\_{s\_{i}}^{T} & \left.\dfrac{dp}{ds}\right|\_{s\_{i}}
-\end{pmatrix)\right)
+\end{pmatrix}\right)
 \left(\begin{pmatrix} 
 \left.\dfrac{d\textbf{x}}{ds}\right|\_{s\_{+1}} \\ \left.\dfrac{dp}{ds}\right|\_{s\_{i+1}}
 \end{pmatrix}\right)
