@@ -2,7 +2,7 @@
 
 El método de Newton se utiliza para entontrar raices de una función de forma iterativa. Cuando la función va de $F:\mathbb{R}^{n+1}\rightarrow \mathbb{R}^{n}$ la iteración está dada por:
 
-$$ \left(\begin{array}{c} x^{i+1}\_{1} \\ \vdots \\ x^{i+1}_{n} \\ p_{i+1} \end{array}\right) = \left(\begin{array}{c} x^{i}_{1} \\ \vdots \\ x^{i}_{n} \\ p_{i} \end{array}\right) - \dfrac{||F(\textbf{x}_{i},p_{i})||}{\nabla||F(\textbf{x}_{i},p_{i})||\cdot \nabla||F(\textbf{x}_{i},p_{i})||}\nabla||F(\textbf{x}_{i},p_{i})|| $$
+$$ \left(\begin{array}{c} x^{i+1}\_{1} \\ \vdots \\ x^{i+1}\_{n} \\ p\_{i+1} \end{array}\right) = \left(\begin{array}{c} x^{i}\_{1} \\ \vdots \\ x^{i}\_{n} \\ p\_{i} \end{array}\right) - \dfrac{||F(\textbf{x}\_{i},p\_{i})||}{\nabla||F(\textbf{x}\_{i},p\_{i})||\cdot \nabla||F(\textbf{x}\_{i},p\_{i})||}\nabla||F(\textbf{x}\_{i},p\_{i})|| $$
 
 # Continuación por Pseudo Longitud de Arco.
 
