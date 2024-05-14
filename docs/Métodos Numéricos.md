@@ -16,16 +16,16 @@ donde $s$ representa la longitud de arco de la rama de equilibrio, $\textbf{x}\_
 La solución a este sistema [Doedel] nos proporciona este sistema de ecuaciones que podemos resolver de forma automática en Julia:
 
 $$
-\left(\begin{array}{cc} 
-F\_{\textbf{x}}(\textbf{x}\_{i+1},p\_{i+1}) & F\_{p}(\textbf{x}\_{i+1},p\_{i+1}) \\ \left.\dfrac{d\textbf{x}}{ds}\right|_{s\_{i}}^{T} & \left.\dfrac{dp}{ds}\right|_{s\_{i}}
-\end{array}\right)
-\left(\begin{array}{c} 
-\left.\dfrac{d\textbf{x}}{ds}\right|_{s\_{+1}} \\ \left.\dfrac{dp}{ds}\right|_{s\_{i+1}}
-\end{array}\right)
+\left(\begin{pmatrix}
+F\_{\textbf{x}}(\textbf{x}\_{i+1},p\_{i+1}) & F\_{p}(\textbf{x}\_{i+1},p\_{i+1}) \\ \left.\dfrac{d\textbf{x}}{ds}\right|\_{s\_{i}}^{T} & \left.\dfrac{dp}{ds}\right|\_{s\_{i}}
+\end{pmatrix)\right)
+\left(\begin{pmatrix} 
+\left.\dfrac{d\textbf{x}}{ds}\right|\_{s\_{+1}} \\ \left.\dfrac{dp}{ds}\right|\_{s\_{i+1}}
+\end{pmatrix}\right)
 =
-\left(\begin{array}{c} 
+\left(\begin{pmatrix} 
 \textbf{0} \\ 1
-\end{array}\right)
+\end{pmatrix}}\right)
  $$
 
 Con esto, podemos asociar $\Delta \textbf{x}\_{i+1} = \left.\dfrac{d\textbf{x}}{ds}\right|_{s\_{+1}}$ y $\Delta p\_{i+1} = \left.\dfrac{dp}{ds}\right|_{s\_{+1}}$ y de esta manera tener $\textbf{x}\_{i+2} = \textbf{x}\_{i+1} + \Delta \textbf{x}\_{i+1}$ y $p\_{i+2} = p\_{i+1} + \Delta p\_{i+1}$.
