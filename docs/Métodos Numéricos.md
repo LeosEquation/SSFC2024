@@ -9,7 +9,7 @@ $$ \left(\begin{array}{c} x^{i+1}\_{1} \\\ \vdots \\\ x^{i+1}\_{n} \\\ p\_{i+1} 
 Este método es un método de continuación que predice el avance en una rama de equilibrioa partir de un punto inicial. Este consta de resolver el siguiente sistema:
 
 $$F(\textbf{x}\_{i+1},p\_{i+1}) = 0$$
-$$(\textbf{x}\_{i+1}-\textbf{x}\_{i})\cdot \left.\dfrac{d\textbf{x}}{ds}\right|_{s\_{i}} + (p\_{i+1} - p\_{i}) \left.\dfrac{dp}{ds}\right|_{s\_{i}} - \Delta s = 0$$
+$$(\textbf{x}\_{i+1}-\textbf{x}\_{i})\cdot \left.\dfrac{d\textbf{x}}{ds}\right|\_{s\_{i}} + (p\_{i+1} - p\_{i}) \left.\dfrac{dp}{ds}\right|\_{s\_{i}} - \Delta s = 0$$
 
 donde $s$ representa la longitud de arco de la rama de equilibrio, $\textbf{x}\_{i} = \textbf{x}(s\_{i})$, $p\_{i} = p(s\_{i})$ y $\Delta s = \sqrt{(\textbf{x}\_{i+1} - \textbf{x}\_{i})\cdot (\textbf{x}\_{i+1} - \textbf{x}\_{i}) + (p\_{i+1}-p\_{i})^{2}}$
 
