@@ -5,19 +5,11 @@
 
 #-
 
-using TaylorSeries, LinearAlgebra
+#using TaylorSeries, LinearAlgebra
 
 #-
 
-s = Taylor1(1)
-r = Taylor1([0.0,0.0],1)
-
-#-
-
-include("diff_tools.jl")
-include("implicit_function.jl")
-include("newton.jl")
-include("psarc.jl")
+#include("equilibrium_functions.jl")
 
 #-
 
@@ -35,32 +27,35 @@ dadas y `X` es la imagen los valores de `P`, entendiendo que `x(p)` con `x ∈ X
 """
 function Equilibrium(f::Function, x_ini::Float64, p_ini::Float64, t::Float64, Δs::Float64, p_fin::Float64; N = 10000)
         
-    X = Float64[]
-    P = Float64[]
+    X = [x_ini]
+    P = [p_ini]
 
-    push!(P,p_ini)
-    push!(X,x_ini)
+    x = x_ini
+    p = p_ini
 
-    x_s, p_s = Derivative_arclength(f, x_ini, p_ini, t, p_fin)
-    x = x_ini + x_s*Δs
-    p = p_ini + p_s*Δs
+    i = 1
 
-    x, p = Newton(f,x,p,t)
+    x0 = x
+    p0 = p
+    x0_s, p0_s = Equilibrium_initial_values(f,x0,p0,t,p_fin)
 
-    push!(P,p)
-    push!(X,x)
-
-    i = 0
-
-    while p_ini <= p <= p_fin && i <= N 
-        x_s, p_s = step(f, x+x_s*Δs, p+p_s*Δs, t, x_s, p_s)
-        x, p = Newton(f,x + Δs*x_s,p + Δs*p_s, t)
-        push!(P,p)
+    while p_ini <= p <= p_fin && i <= N
+        
+        j = 1
+        while j <= 30 && norm(Equilibrium_Function(f,x,p,t,x0,p0,x0_s,p0_s,Δs)) > 1.e-16
+            x, p = [x; p] - inv(Equilibrium_Jacobian(f,x,p,t,x0_s,p0_s))*Equilibrium_Function(f,x,p,t,x0,p0,x0_s,p0_s,Δs)
+            j += 1
+        end
         push!(X,x)
-        i+=1  
+        push!(P,p)
+
+        x0_s, p0_s = Equilibrium_Jacobian(f,x,p,t,x0_s,p0_s)\[0.0 ; 1.0]
+        x0 = x
+        p0 = p
+        i += 1
     end
 
-    return P,X
+    return P, X
 
 end
 
@@ -74,40 +69,37 @@ es el dominio de la rama de solución correspondiente a las condiciones iniciale
 dadas y `X` es la imagen los valores de `P`, entendiendo que `x(p)` con `x ∈ X` y `p ∈ P` es tal que 
 `f(x(p),p') ≈ 0.0` donde `p'[indice] = p`.
 """
-function Equilibrium(f::Function, x_ini::Float64, p_ini::Vector{Float64}, t::Float64, Δs::Float64, p_fin::Float64,indice::Int64; N = 10000)
-    
-    S = [i == indice ? s : r for i in 1:length(p_ini)]
+function Equilibrium(f::Function, x_ini::Float64, p_ini::Float64, t::Float64, Δs::Float64, p_fin::Float64,indice::Int64; N = 10000)
+        
+    X = [x_ini]
+    P = [p_ini]
 
-    X = Float64[]
-    P = Float64[]
+    x = x_ini
+    p = p_ini
 
-    if indice > length(p_ini)
-        throw(ArgumentError("El índice de variable no está dentro de la dimensión"))
-    end
+    i = 1
 
-    push!(P,p_ini[indice])
-    push!(X,x_ini)
+    x0 = x
+    p0 = p
+    x0_s, p0_s = Equilibrium_initial_values(f,x0,p0,t,p_fin,indice)
 
-    x_s, p_s = Derivative_arclength(f, x_ini, p_ini, t, p_fin, indice)
-    x = x_ini + x_s*Δs
-    p = p_ini + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)]
-
-    x, p = Newton(f,x,p,t,indice)
-    push!(P,p[indice])
-    push!(X,x)
-    
-
-    i = 0
-
-    while p_ini[indice] <= p[indice] <= p_fin && i <= N
-        x_s, p_s = step(f!, x + x_s*Δs, p + p_s*Δs, t, x_s, p_s,indice)
-        x, p = Newton(f,x + Δs*x_s,p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)], t,indice)
-        push!(P,p[indice])
+    while p_ini <= p <= p_fin && i <= N
+        
+        j = 1
+        while j <= 30 && norm(Equilibrium_Function(f,x,p,t,x0,p0,x0_s,p0_s,Δs,p_ini,indice)) > 1.e-16
+            x, p = [x; p] - inv(Equilibrium_Jacobian(f,x,p,t,x0_s,p0_s,p_ini,indice))*Equilibrium_Function(f,x,p,t,x0,p0,x0_s,p0_s,Δs,p_ini,indice)
+            j += 1
+        end
         push!(X,x)
-        i+=1  
+        push!(P,p)
+
+        x0_s, p0_s = Equilibrium_Jacobian(f,x,p,t,x0_s,p0_s,p_ini,indice)\[0.0 ; 1.0]
+        x0 = x
+        p0 = p
+        i += 1
     end
 
-    return P,X
+    return P, X
 
 end
 
@@ -130,34 +122,40 @@ dadas y `X` es la imagen los valores de `P`, entendiendo que `x(p)` con `x ∈ X
 """
 function Equilibrium(f!::Function, x_ini::Vector{Float64}, p_ini::Float64, t::Float64, Δs::Float64, p_fin::Float64; N = 10000)
         
-    X = Vector{Float64}[]
-    P = Float64[]
+    n = length(x_ini)
+    X = [x_ini]
+    P = [p_ini]
 
-    push!(P,p_ini)
-    push!(X,x_ini)
+    x = x_ini
+    p = p_ini
 
-    x_s, p_s = Derivative_arclength(f!, x_ini, p_ini, t, p_fin)
+    i = 1
 
-    x = x_ini + x_s*Δs
-    p = p_ini + p_s*Δs
+    x0 = x
+    p0 = p
+    x0_s, p0_s = Equilibrium_initial_values(f!,x0,p0,t,p_fin)
 
-    
-    x, p = Newton(f!,x,p,t)
-
-    push!(P,p)
-    push!(X,x)
-    
-    i = 2
-
-    while p_ini <= p <= p_fin && i <= N 
-        x_s, p_s = step(f!, x + x_s*Δs, p + p_s*Δs, t, x_s, p_s)
-        x, p = Newton(f!,x + x_s*Δs, p + p_s*Δs, t)
-        push!(P,p)
+    while p_ini <= p <= p_fin && i <= N
+        
+        j = 1
+        while j <= 30 && norm(Equilibrium_Function(f!,x,p,t,x0,p0,x0_s,p0_s,Δs)) > 1.e-16
+            V = [x; p] - inv(Equilibrium_Jacobian(f!,x,p,t,x0_s,p0_s))*Equilibrium_Function(f!,x,p,t,x0,p0,x0_s,p0_s,Δs)
+            x = V[1:n]
+            p = V[end]
+            j += 1
+        end
         push!(X,x)
-        i+=1  
+        push!(P,p)
+
+        Dir = Equilibrium_Jacobian(f!,x,p,t,x0_s,p0_s)\[zeros(n) ; 1.0]
+        x0_s = Dir[1:n]
+        p0_s = Dir[end]
+        x0 = x
+        p0 = p
+        i += 1
     end
 
-    return P,X
+    return P, X
 
 end
 
@@ -175,41 +173,42 @@ dadas y `X` es la imagen los valores de `P`, entendiendo que `x(p)` con `x ∈ X
 
 donde `p'[indice] = p`
 """
-function Equilibrium(f!::Function, x_ini::Vector{Float64}, p_ini::Vector{Float64}, t::Float64, Δs::Float64, p_fin::Float64,indice::Int64; tol = 1.e-16, N = 10000)
+function Equilibrium(f!::Function, x_ini::Vector{Float64}, p_ini::Vector{Float64}, t::Float64, Δs::Float64, p_fin::Float64,indice::Int64; N = 10000)
+        
+    n = length(x_ini)
+    X = [x_ini]
+    P = [p_ini[indice]]
+
+    x0_s, p0_s = Equilibrium_initial_values(f!,x_ini,p_ini,t,p_fin,indice)
+
+    x = x_ini
+    p = p_ini[indice]
+    x0 = x
+    p0 = p
     
-    S = [i == indice ? s : r for i in 1:length(p_ini)]
+    i = 1
 
-    X = Vector{Float64}[]
-    P = Float64[]
-
-    if indice > length(p_ini)
-        throw(ArgumentError("El índice de variable no está dentro de la dimensión"))
-    end
-
-    push!(P,p_ini[indice])
-    push!(X,x_ini)
-
-    x_s, p_s = Derivative_arclength(f!, x_ini, p_ini, t, p_fin,indice)
-
-    x = x_ini + x_s*Δs
-    p = p_ini + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)]
-    
-    x, p = Newton(f!,x,p,t,indice)
-
-    push!(P,p[indice])
-    push!(X,x)
-
-    i = 0
-
-    while p_ini[indice] <= p[indice] <= p_fin && i <= N
-        x_s, p_s = step(f!, x + x_s*Δs, p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)], t, x_s, p_s,indice)
-        x, p = Newton(f!,x + x_s*Δs,p + [i == indice ? p_s*Δs : 0.0 for i in 1:length(p_ini)], t,indice)
-        push!(P,p[indice])
+    while p_ini[indice] <= p <= p_fin && i <= N
+        
+        j = 1
+        while j <= 30 && norm(Equilibrium_Function(f!,x,p,t,x0,p0,x0_s,p0_s,Δs,p_ini,indice)) > 1.e-16
+            V = [x; p] - inv(Equilibrium_Jacobian(f!,x,p,t,x0_s,p0_s,p_ini,indice))*Equilibrium_Function(f!,x,p,t,x0,p0,x0_s,p0_s,Δs,p_ini,indice)
+            x = V[1:n]
+            p = V[end]
+            j += 1
+        end
         push!(X,x)
-        i+=1  
+        push!(P,p)
+
+        Dir = Equilibrium_Jacobian(f!,x,p,t,x0_s,p0_s,p_ini,indice)\[zeros(n) ; 1.0]
+        x0_s = Dir[1:n]
+        p0_s = Dir[end]
+        x0 = x
+        p0 = p
+        i += 1
     end
 
-    return P,X
+    return P, X
 
 end
 
