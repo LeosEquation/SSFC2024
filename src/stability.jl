@@ -6,7 +6,7 @@
 
 #-
 
-using TaylorSeries
+#using TaylorSeries
 
 #-
 
@@ -113,8 +113,18 @@ es estable y `false` en caso contrario.
 """
 function Stability(f!::Function,x::Vector{Float64},p::Float64,t::Float64)
 
-    J = Jacobian(f!,x,p,t)
-    J = J[:,1:end-1]
+    n = length(x)
+    s = Taylor1(2)
+    r = Taylor1([0.0,0.0],2)
+
+    J = zeros(n,n)
+    for i in 1:n
+        for j in 1:n
+            dx = [s for i in 1:n]
+            f!(dx,x + [k == j ? s : r for k in 1:n], p + r, t + r)
+            J[i,j] = differentiate(dx[i])(0.0)
+        end
+    end
 
     if all(real.(eigvals(J)) .< 0.0)
         return true
@@ -164,8 +174,18 @@ es estable y `false` en caso contrario.
 """
 function Stability(f!::Function,x::Vector{Float64},p::Vector{Float64},t::Float64,indice::Int64)
 
-    J = Jacobian(f!,x,p,t,indice)
-    J = J[:,1:end-1]
+    n = length(x)
+    s = Taylor1(2)
+    r = Taylor1([0.0,0.0],2)
+
+    J = zeros(n,n)
+    for i in 1:n
+        for j in 1:n
+            dx = [s for i in 1:n]
+            f!(dx,x + [k == j ? s : r for k in 1:n], p .+ r, t + r)
+            J[i,j] = differentiate(dx[i])(0.0)
+        end
+    end
 
     if all(real.(eigvals(J)) .< 0.0)
         return true
