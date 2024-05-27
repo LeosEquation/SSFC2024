@@ -1,6 +1,4 @@
-include("../../src/equilibrium.jl");
-include("../../src/bifurcation.jl");
-include("../../src/stability.jl");
+include("../../src/NumDiffEq.jl");
 
 #-
 
@@ -24,10 +22,14 @@ end;
 #-
 
 tiempo = @elapsed begin
-solfams = Equilibrium.(g, x_ini, p_ini, t, Δs, p_fin);
-bifurcaciones = Bifurcation_point.(g,x_ini,p_ini,t)
-estabilidad = Stability_intervals.(g,t,solfams)
+ramas_de_equilibrio = Equilibrium.(g, x_ini, p_ini, t, Δs, p_fin);
+LBP = Limit_Points.(g,ramas_de_equilibrio,t,p_fin)
+estabilidad = Stability_intervals.(g,t,ramas_de_equilibrio)
 end;
+
+#-
+
+LBP = [[(LBP[i][j][1],LBP[i][j][2]) for j in 1:length(LBP[i])] for i in 1:length(LBP)];
 
 #-
 
@@ -35,12 +37,12 @@ begin
     plot(title = "Puntos de equilibrio \n Tiempo de ejecución = $(tiempo) s", ylabel = "u(λ)", xlabel = "λ",legendfont=font(5))
     plot!(estabilidad[1][1], label = "Puntos estables", color = "blue", linestyle = :solid)
     plot!(estabilidad[1][2], label = "Puntos inestables", color = "blue", linestyle = :dash)
+    scatter!(LBP[1], label = "Bifurcaciones LP", color = "white")
     for i in 2:length(estabilidad)
         plot!(estabilidad[i][1], label = "", color = "blue", linestyle = :solid)
         plot!(estabilidad[i][2], label = "", color = "blue", linestyle = :dash)
+        scatter!(LBP[i], label = "", color = "white")
     end
-    scatter!(bifurcaciones[1],color = "red", label = "Bifurcación", markersize = 3)
-    scatter!(bifurcaciones[2:end],color = "red", label = "", markersize = 3)
     savefig("Ejemplo 1D.png")
 end;
 
@@ -49,40 +51,15 @@ end;
 begin
     precisiones = []
 
-    for i in 1:length(x_ini)
+    #=for i in 1:length(x_ini)
         precisioni = plot(title = "λ_ini = $(p_ini), x_ini = $(x_ini[i])", ylabel = "|g(u(λ),λ)| / 1×10⁻¹⁶", titlefontsize = 7, xlabel = "λ", guidefontsize = 8)
-        plot!(solfams[i][1],abs.(g.(solfams[i][2],solfams[i][1],t)) .* 1.e16 ,label = "")
+        plot!(ramas_de_equilibrio[i][1],abs.(g.(ramas_de_equilibrio[i][2],ramas_de_equilibrio[i][1],t)) ,label = "")
         push!(precisiones,precisioni)
-    end
+    end=#
 
-    plot(precisiones..., layout = (1,2),plot_title="Precisión de las ramas de soluciones",plot_titlefontsize = 10)
+    #plot(precisiones..., layout = (1,2),plot_title="Precisión de las ramas de soluciones",plot_titlefontsize = 10)
 
-    savefig("Precision.png")
+    #savefig("Precision.png")
 end;
 
 #-
-
-A = [rand() for i in 1:3,j in 1:3]
-
-det(A)
-
-L, U, P = factorize(A)
-
-
-L
-U
-P
-
-A
-
-P
-
-[i == j ? 1 : 0 for i in 1:length(P), j in P]*L*U
-
--det(U)
-
-det([i == j ? 1 : 0 for i in 1:length(P), j in P])
-
-det(L)
-
-det(A)
