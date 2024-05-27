@@ -4,174 +4,305 @@
 
 #-
 
-include("diff_tools.jl")
-
-#-
-
-using TaylorSeries, LinearAlgebra
-
-#-
-
-"""
-    Bifurcation_point(f::Function,x0::Float64,p0::Float64,t::Float64; type_bif = false)
-
-Esta función devuelve el punto de bifurcación `p::Float64, x::Float64` más cercano a `x0` y `p0`
-de la ecuación diferencial descrita por `f`. Si `type_bif = true` se imprimirá el tipo de bifurcación.
-"""
-function Bifurcation_point(f::Function,x0::Float64,p0::Float64,t::Float64; type_bif = false)
-    S = set_variables("s",numvars = 2,order = 3)
-    x = x0 + S[1]
-    p = p0 + S[2]
-    ceros = zeros(length(x0)+1)
-    Bif_vec(x,p,t) = [f(x,p,t),derivative(f(x,p,t),1)]
-    i = 1
-    while i <= 30 && norm(Bif_vec(x,p,t)(ceros)) > 1.e-16
-        x, p = [x,p] - inv(TaylorSeries.jacobian(Bif_vec(x,p,t),ceros))*Bif_vec(x,p,t)(ceros)
-        i += 1
-    end
-    if type_bif
-        Type_Bifurcation(f,x,p,t,ceros)
-    end
-    return p(ceros), x(ceros)
-end
-
-#-
-
-"""
-    Bifurcation_point(f::Function,x0::Float64,p0::Float64,t::Float64,indice::Int64; type_bif = false)
-
-Esta función devuelve el punto de bifurcación `p[indice]::Float64, x::Float64` más cercano a `x0` y `p0[indice]`
-de la ecuación diferencial descrita por `f`. Si `type_bif = true` se imprimirá el tipo de bifurcación.
-"""
-function Bifurcation_point(f::Function,x0::Float64,p0::Vector{Float64},t::Float64,indice::Int64; type_bif = false)
-    S = set_variables("s",numvars = 2,order = 3)
-    x = x0 + S[1]
-    p = p0 + [i == indice ? S[2] : p0[i] for i in 1:length(p)]
-    p_i = p0[indice]
-    ceros = zeros(length(x0)+1)
-    Bif_vec(x,p,t) = [f(x,p,t),derivative(f(x,p,t),1)]
-    i = 1
-    while i <= 30 && norm(Bif_vec(x,p,t)(ceros)) > 1.e-16
-        x, p_i = [x,p_i] - inv(TaylorSeries.jacobian(Bif_vec(x,p,t),ceros))*Bif_vec(x,p,t)(ceros)
-        p = p + [i == indice ? p_i : p0[i] for i in 1:length(p)]
-        i += 1
-    end
-    if type_bif
-        Type_Bifurcation(f,x,p,t,ceros)
-    end
-    return p(ceros)[indice], x(ceros)
-end
-
-#-
-
-"""
-    Hopf_bifurcation(f!::Function,t::Float64,equilibrium_points::Tuple{Vector{Float64}, Vector{Vector{Float64}}})
-
-Esta función devuelve un arreglo de los puntos `hopf_bifs::Vector{Union{Vector{Float64},Float64}}` de la rama de equilibrio 
-`equilibrium_points` más cercanos a alguna bifurcación de Hopf.
-"""
-function Hopf_bifurcation(f!::Function,t::Float64,equilibrium_points::Tuple{Vector{Float64}, Vector{Vector{Float64}}})
-
-    X = equilibrium_points[2]
-    P = equilibrium_points[1]
-
-    J = Jacobian.(f!,X,P,t)
-    J = [j[:,1:end-1] for j in J]
-
-    Eigvalues = [real.(eigvals(j)) for j in J]
-
-    hopf_bifs = Vector{Union{Vector{Float64},Float64}}[]
-
-    for i in 1:(length(Eigvalues)-1)
-        j = 0
-        for k in 1:length(Eigvalues[i])
-            if real(Eigvalues[i][k]) * real(Eigvalues[i+1][k]) <= 0.0
-                j += 1
-            end
-        end
+function Limit_Points(f::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Float64}},t::Float64,p_fin::Float64; ω = 1.0, test = false)
     
-        if j >= 2
-            push!(hopf_bifs,[P[i],X[i]])
-        end
-    end
+    initial_values = LP_initial_values(f,equilibrium_branch,t)
 
-    if length(hopf_bifs) == 0
-        return push!(hopf_bifs,[NaN,[NaN for i in X[1]]])
-    end
+    p_min = minimum([equilibrium_branch[1][1],p_fin])
+    p_max = maximum([equilibrium_branch[1][1],p_fin])
 
-    return hopf_bifs
-end
+    LPs = Vector{Float64}[]
 
-#-
+    for initial_value in initial_values
+        p0, x0, v0, λ0 = initial_value
 
-"""
-    Hopf_bifurcation(f!::Function,p_ini::Vector{Float64},t::Float64,indice::Int64,
-    equilibrium_points::Tuple{Vector{Float64}, Vector{Vector{Float64}}})
+        x = x0
+        p = p0
+        v = v0
 
-Esta función devuelve un arreglo de los puntos `hopf_bifs::Vector{Union{Vector{Float64},Float64}}` de la rama de equilibrio 
-`equilibrium_points` más cercanos a alguna bifurcación de Hopf.
-"""
-function Hopf_bifurcation(f!::Function,p_ini::Vector{Float64},t::Float64,indice::Int64,equilibrium_points::Tuple{Vector{Float64}, Vector{Vector{Float64}}})
+        i = 1
 
-    X = equilibrium_points[2]
-    P = equilibrium_points[1]
-    Ps = [[i == indice ? P[j] : p_ini[i] for i in 1:length(p_ini)] for j in 1:length(P)]
+        while i <= 30 && norm(LP_Function(f,x,p,v,t; ω = ω)) > 1.e-16 && norm(λ0) > 1.e-16
 
-    J = Jacobian.(f!,X,Ps,t,indice)
-    J = [j[:,1:end-1] for j in J]
-
-    Eigvalues = [real.(eigvals(j)) for j in J]
-
-    hopf_bifs = Vector{Union{Vector{Float64},Float64}}[]
-
-    for i in 1:(length(Eigvalues)-1)
-        j = 0
-        for k in 1:length(Eigvalues[i])
-            if real(Eigvalues[i][k]) * real(Eigvalues[i+1][k]) <= 0.0
-                j += 1
+            if test
+                println("Paso $(i): λ = $(p)")
+                println("           x = $(x)")
+                println("           norm(LP_Function) = $(norm(LP_Function(f,x,p,v,t)))")
+                println("\n")
+                show(stdout, "text/plain",  LP_Function(f,x,p,v,t))
+                println("\n")
             end
+
+            ω = v
+
+            X = [x;p;v] - inv(LP_Jacobian(f,x,p,v,t; ω = ω))*LP_Function(f,x,p,v,t; ω = ω)
+            x = X[1]
+            p = X[2]
+            v = X[3]
+            i += 1
         end
+        
+        if p_min <= p <= p_max
+            push!(LPs,[p,x])
+        end
+
+    end
+
+        return LPs
+end
+
+#-
+
+function Limit_Points(f::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Float64}},t::Float64,p_ini::Vector{Float64},indice::Int64,p_fin::Float64; ω = 1.0, test = false)
     
-        if j >= 2
-            push!(hopf_bifs,[P[i],X[i]])
+    initial_values = LP_initial_values(f,equilibrium_branch,t,p_ini,indice)
+
+    p_min = minimum([equilibrium_branch[1][1],p_fin])
+    p_max = maximum([equilibrium_branch[1][1],p_fin])
+
+    LPs = Vector{Float64}[]
+
+    for initial_value in initial_values
+        p0, x0, v0, λ0 = initial_value
+
+        x = x0
+        p = p0
+        v = v0
+
+        i = 1
+
+        while i <= 30 && norm(LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)) > 1.e-16 && norm(λ0) > 1.e-16
+
+            if test
+                println("Paso $(i): λ = $(p)")
+                println("           x = $(x)")
+                println("           v = $(v)")
+                println("           norm(LP_Function) = $(norm(LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)))")
+                println("\n")
+                show(stdout, "text/plain",  LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω))
+                println("\n")
+            end
+
+            ω = v
+
+            X = [x;p;v] - inv(LP_Jacobian(f!,x,p,v,t,p_ini,indice; ω = ω))*LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)
+            x = X[1]
+            p = X[2]
+            v = X[3]
+            i += 1
         end
+        
+        if p_min <= p <= p_max
+            push!(LPs,[p,x])
+        end
+
     end
 
-    return hopf_bifs
+        return LPs
+end
+#-
+
+function Limit_Points(f!::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Vector{Float64}}},t::Float64,p_fin::Float64; ω = ones(length(equilibrium_branch[2][1])), test = false)
+    
+    initial_values = LP_initial_values(f!,equilibrium_branch,t)
+
+    p_min = minimum([equilibrium_branch[1][1],p_fin])
+    p_max = maximum([equilibrium_branch[1][1],p_fin])
+
+    LPs = Vector{Union{Float64,Vector{Float64}}}[]
+
+    for initial_value in initial_values
+        p0, x0, v0, λ0 = initial_value
+
+        x = x0
+        p = p0
+        v = v0
+
+        i = 1
+
+        while i <= 30 && norm(LP_Function(f!,x,p,v,t; ω = ω)) > 1.e-16 && norm(λ0) > 1.e-16
+
+            if test
+                println("Paso $(i): λ = $(p)")
+                println("           x = $(x)")
+                println("           norm(LP_Function) = $(norm(LP_Function(f!,x,p,v,t)))")
+                println("\n")
+                show(stdout, "text/plain",  LP_Function(f!,x,p,v,t))
+                println("\n")
+            end
+
+            ω = v
+
+            X = [x;p;v] - inv(LP_Jacobian(f!,x,p,v,t; ω = ω))*LP_Function(f!,x,p,v,t; ω = ω)
+            x = X[1:length(x)]
+            p = X[length(x)+1]
+            v = X[length(x)+2:end]
+            i += 1
+        end
+        
+        if p_min <= p <= p_max
+            push!(LPs,[p,x])
+        end
+
+    end
+
+        return LPs
 end
 
 #-
 
-"""
-    Type_Bifurcation(f::Function,x::TaylorN,p::TaylorN,t::Float64,ceros::Vector{Float64})
+function Limit_Points(f!::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Vector{Float64}}},t::Float64,p_ini::Vector{Float64},indice::Int64,p_fin::Float64; ω = ones(length(equilibrium_branch[2][1])), test = false)
+    
+    initial_values = LP_initial_values(f!,equilibrium_branch,t,p_ini,indice)
 
-Esta es una función auxiliar para determinar el tipo de bifurcación.
-"""
-function Type_Bifurcation(f::Function,x::TaylorN,p::TaylorN,t::Float64,ceros::Vector{Float64})
-    f_p = derivative(f(x,p,t),2)(ceros)
-    f_xx = derivative(derivative(f(x,p,t),1),1)(ceros)
-    f_pp = derivative(derivative(f(x,p,t),2),2)(ceros)
-    f_xp = derivative(derivative(f(x,p,t),1),2)(ceros)
-    f_xpp = derivative(derivative(derivative(f(x,p,t),1),2),2)(ceros)
-    f_xxx = derivative(derivative(derivative(f(x,p,t),1),1),1)(ceros)
+    p_min = minimum([equilibrium_branch[1][1],p_fin])
+    p_max = maximum([equilibrium_branch[1][1],p_fin])
 
-    if abs(f_p) > 1.e-16  && abs(f_xx) > 1.e-16
-        println("Esta es una bifurcación Nodo de Saddle")
-    elseif abs(f_p) <= 1.e-16  && abs(f_xx) > 1.e-16
-        println("Esta es una bifurcación Transcrítica")
-    elseif abs(f_p) <= 1.e-16  && abs(f_pp) <= 1.e-16 && abs(f_xp) > 1.e-16 && abs(f_xpp) > 1.e-16 && abs(f_xxx) > 1.e-16
-        println("Esta es una bifurcación de Pitchfork")
-    else
-        println("No se encontró el tipo de bifurcación, estas son las derivadas parciales en ese punto:")
-        println("∂f/∂p = $(f_p)")
-        println("∂²f/∂x² = $(f_xx)")
-        println("∂²f/∂p² = $(f_pp)")
-        println("∂³f/∂x∂p² = $(f_xpp)")
-        println("∂³f/∂x³= $(f_xxx)")
+    LPs = Vector{Union{Float64,Vector{Float64}}}[]
+
+    for initial_value in initial_values
+        p0, x0, v0, λ0 = initial_value
+
+        x = x0
+        p = p0
+        v = v0
+
+        i = 1
+
+        while i <= 30 && norm(LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)) > 1.e-16 && norm(λ0) > 1.e-16
+
+            if test
+                println("Paso $(i): λ = $(p)")
+                println("           x = $(x)")
+                println("           v = $(v)")
+                println("           norm(LP_Function) = $(norm(LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)))")
+                println("\n")
+                show(stdout, "text/plain",  LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω))
+                println("\n")
+            end
+
+            ω = v
+
+            X = [x;p;v] - inv(LP_Jacobian(f!,x,p,v,t,p_ini,indice; ω = ω))*LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)
+            x = X[1:length(x)]
+            p = X[length(x)+1]
+            v = X[length(x)+2:end]
+            i += 1
+        end
+        
+        if p_min <= p <= p_max
+            push!(LPs,[p,x])
+        end
+
     end
+
+        return LPs
 end
 
 #-
+
+function Hopf_Points(f!::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Vector{Float64}}},t::Float64,p_fin::Float64; test = false)
+    
+    initial_values = Hopf_initial_values(f!,equilibrium_branch,t)
+
+    p_min = minimum([equilibrium_branch[1][1],p_fin])
+    p_max = maximum([equilibrium_branch[1][1],p_fin])
+
+    HPs = Vector{Union{Float64,Vector{Float64}}}[]
+
+    for initial_value in initial_values
+        p0, x0, κ0, v0, w0 = initial_value
+
+        x = x0
+        p = p0
+        v = v0
+        κ = κ0
+        w = w0
+        
+        i = 1
+
+        while i <= 30 && norm(Hopf_Function(f!,x,p,v,κ,t,w)) > 1.e-16
+
+            if test
+                println("Paso $(i): λ = $(p)")
+                println("           x = $(x)")
+                println("           norm(Hopf_Function) = $(norm(Hopf_Function(f!,x,p,v,κ,t,w)))")
+                println("\n")
+                show(stdout, "text/plain",  Hopf_Function(f!,x,p,v,κ,t,w))
+                println("\n")
+            end
+
+            X = [x;p;v;κ] - inv(Hopf_Jacobian(f!,x,p,v,κ,t,w))*Hopf_Function(f!,x,p,v,κ,t,w)
+            x = X[1:length(x)]
+            p = X[length(x)+1]
+            v = X[length(x)+2:2*length(x)+1]
+            κ = X[end]
+
+            i += 1
+        end
+
+        if p_min <= p <= p_max
+            push!(HPs,[p,x])
+        end
+
+    end
+
+        return HPs
+end
+
+#-
+
+function Hopf_Points(f!::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Vector{Float64}}},t::Float64,p_ini::Vector{Float64},indice::Int64,p_fin::Float64; test = false)
+    
+    initial_values = Hopf_initial_values(f!,equilibrium_branch,t,p_ini,indice)
+
+    p_min = minimum([equilibrium_branch[1][1],p_fin])
+    p_max = maximum([equilibrium_branch[1][1],p_fin])
+
+    HPs = Vector{Union{Float64,Vector{Float64}}}[]
+
+    for initial_value in initial_values
+        p0, x0, κ0, v0, w0 = initial_value
+
+        x = x0
+        p = p0
+        v = v0
+        κ = κ0
+        w = w0
+        
+        i = 1
+
+        while i <= 30 && norm(Hopf_Function(f!,x,p,v,κ,t,w,p_ini,indice)) > 1.e-16
+
+            if test
+                println("Paso $(i): λ = $(p)")
+                println("           x = $(x)")
+                println("           norm(Hopf_Function) = $(norm(Hopf_Function(f!,x,p,v,κ,t,w,p_ini,indice)))")
+                println("\n")
+                show(stdout, "text/plain",  Hopf_Function(f!,x,p,v,κ,t,w,p_ini,indice))
+                println("\n")
+            end
+
+            X = [x;p;v;κ] - inv(Hopf_Jacobian(f!,x,p,v,κ,t,w,p_ini,indice))*Hopf_Function(f!,x,p,v,κ,t,w,p_ini,indice)
+            x = X[1:length(x)]
+            p = X[length(x)+1]
+            v = X[length(x)+2:2*length(x)+1]
+            κ = X[end]
+
+            i += 1
+        end
+        
+        if p_min <= p <= p_max
+            push!(HPs,[p,x])
+        end
+
+    end
+
+        return HPs
+end
+
+#-
+
 
 # ### Referencias
 
