@@ -1,0 +1,79 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{references.bib}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\author{Leonel Mayorga López}
+\title{Antecedentes}
+\begin{document}
+
+
+\maketitle
+
+\section{Ramas de equilibrio en modelos de ecuaciones diferenciales}
+
+Sea \( F: D_{F} \subseteq \mathbb{R}^{n} \times \mathbb{R} \rightarrow \mathbb{R}^{n} \) una función que define un modelo de ecuaciones diferenciales tal que \( F(x,p) = \frac{d\mathbf{x}}{dt} \) donde \( \mathbf{x}: D_{\mathbf{t}} \subseteq \mathbb{R} \rightarrow \mathbb{R}^{n} \), \( t \in D_{\mathbf{t}} \) y \( p \in \mathbb{R} \) con \( n \in \mathbb{N} \).\\
+
+Entonces, \((\mathbf{x}, p)\) es un punto de equilibrio si \( F(x,p) = 0 \).\\
+
+Si existe una función \( \mathbf{x}: D_{\mathbf{p}} \subset \mathbb{R} \rightarrow \mathbb{R}^{n} \) continuamente diferenciable tal que \( F(\mathbf{x}(p), p) = 0 \) para toda \( p \in D_{\mathbf{p}} \), entonces \( \mathbf{x} \) será una rama de equilibrio de \( F \).\\
+
+El Teorema de la Función Implícita asegura que existen ramas de equilibrio y estas son únicas si la función \( F \) satisface que \cite{Doedel}:
+
+\begin{itemize}
+    \item \( F(\mathbf{x}_{0}, p_{0}) = 0 \) con \( \mathbf{x}_{0} \in \mathbb{R}^{n} \) y \( p_{0} \in \mathbb{R} \)
+    \item La matriz jacobiana \( F_{\mathbf{x}}(\mathbf{x}_{0}, p_{0}) \) debe tener una matriz inversa acotada, es decir, para algún \( M > 0 \),
+    \[
+    \| F_{\mathbf{x}}(\mathbf{x}_{0}, p_{0})^{-1} \| \leq M
+    \]
+    \item \( F(\mathbf{x}_{0}, p_{0}) \) y \( F_{\mathbf{x}}(\mathbf{x}_{0}, p_{0}) \) son continuamente diferenciables en \( D_{F} \)
+\end{itemize}
+
+Además, este teorema asegura que
+
+\[
+\dfrac{d\mathbf{x}}{dp} = F_{\mathbf{x}}(x(p), p)^{-1} F_{p}(x(p), p)
+\]
+
+\section{Estabilidad en las ramas de equilibrio}
+
+Un punto estable sucede cuando en el punto \( \mathbf{x}_{0} \) y \( p_{0} \) la parte real de los eigenvalores \( \lambda \) del jacobiano \( F_{\mathbf{x}}(\mathbf{x}_{0}, p_{0}) \) son negativas y un punto inestable sucede cuando al menos uno es positivo.
+
+\section{Bifurcación de punto límite en un modelo de ecuaciones diferenciales}
+
+Una bifurcación de punto límite (LP por sus siglas en inglés) sucede cuando en el punto \( \mathbf{x}_{0} \) y \( p_{0} \) los eigenvalores \( \lambda \) del jacobiano \( F_{\mathbf{x}}(\mathbf{x}_{0}, p_{0}) \) son cero. En este punto puede haber dos ramas de equilibrio.\\
+
+Cuando \( n = 1 \) estas bifurcaciones se pueden clasificar \cite{McCann} en:
+
+\begin{itemize}
+    \item Nodo de Silla: Sucede cuando \( \frac{\partial F}{\partial p} \neq 0 \) y \( \frac{\partial^{2} F}{\partial x^{2}} \neq 0 \)
+    \item Transcrítica: Sucede cuando \( \frac{\partial F}{\partial p} = 0 \) y \( \frac{\partial^{2} F}{\partial x^{2}} \neq 0 \)
+    \item Pitchfork: Sucede cuando \( \frac{\partial F}{\partial p} = 0 \), \( \frac{\partial^{2} F}{\partial p^{2}} = 0 \), \( \frac{\partial^{2} F}{\partial p \partial x} \neq 0 \), \( \frac{\partial^{3} F}{\partial p^{2} \partial x} \neq 0 \) y \( \frac{\partial^{3} F}{\partial x^{3}} \neq 0 \)
+\end{itemize}
+
+\section{Ramas periódicas en un modelo de ecuaciones diferenciales}
+
+Una solución periódica sucede cuando existe un tiempo \( T \in D_{\mathbf{t}} \) que satisface:
+
+\[
+\dfrac{d\mathbf{x}}{dt} = F(\mathbf{x}, p)
+\]
+\[
+\mathbf{x}(t) = \mathbf{x}(t + T)
+\]
+
+Entonces una rama periódica, de manera similar a la de equilibrio, es una función continua \( \mathbf{x}: D_{p} \subseteq \mathbb{R} \rightarrow \mathbb{R}^{n} \) tal que la solución de \( F(\mathbf{x}(p), p) \) es periódica para toda \( p \in D_{p} \).
+
+\section{Bifurcaciones de Hopf}
+
+Una bifurcación de Hopf sucede cuando en el punto \( \mathbf{x}_{0} \) y \( p_{0} \) los eigenvalores \( \lambda \) del jacobiano \( F_{\mathbf{x}}(\mathbf{x}_{0}, p_{0}) \) son puramente imaginarios, es decir \( \lambda = \pm i \beta \) con \( \beta \in \mathbb{R}^{n} \).\\
+
+Una bifurcación de Hopf se caracteriza por ser un punto de equilibrio y ser un punto con solución periódica, es decir, es la intersección entre una rama de equilibrio y una rama periódica.
+
+\printbibliography
+
+\end{document}

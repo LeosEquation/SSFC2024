@@ -1,0 +1,119 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\author{Leonel Mayorga López}
+\title{Métodos}
+\begin{document}
+\maketitle
+\section{Pseudo Longitud de Arco}
+
+Eseé método consiste en encontrar las raíces de una función sobre una trayectoria.
+
+De forma general, si se tiene una función $F:D_{F}\subset\mathbb{R}^{n}\times\mathbb{R}\to\mathbb{R}$ y se quiere hallar una rama de soluciones de equilibrio, el método de Newton en múltiples variables queda descartado pues este necesita tener un Jacobiano no sigular que no tiene al ser no cuadrado. Por ello, se añade una condición que fija la distancia que se desee entre una solución y otra sobre la rama. Esta condición está dada por 
+
+$$(X-X_{0})\cdot\dfrac{dX}{ds} - \Delta s = 0$$
+
+donde $X\in D_{F}$, $\Delta s \in \mathbb{R}$ es la distancia entre soluciones y $X_{0}$ es una solución de equilibrio del ssitema.
+
+De esta manera, el método de Pseudo Longitud de Arco consiste en resolver el sistema:
+
+$$\begin{array}{rcl} F(X) & = & 0 \\ (X-X_{0})\cdot\frac{dX}{ds} - \Delta s & = & 0 \end{array}$$
+
+\section{PLAC en ramas de equilibrio}
+
+Sea $G:D_{G}\subset\mathbb{R}^{n}\times\mathbb{R}\rightarrow\mathbb{R}^{n}$ una función que depende de una variable  $u\in\mathbb{R}^{n}$ y un parámetro $\lambda\in\mathbb{R}$ continuamente diferenciable. El método consiste en resolver el siguiente sistema:
+
+$$\begin{array}{rcl} G(u,\lambda) & = & 0 \\ (u - u_{0})\cdot\frac{du}{ds} + (\lambda - \lambda_{0})\frac{d\lambda}{ds} - \Delta	s & = & 0 \end{array}$$
+
+Donde $u_{0}\in\mathbb{R}^{n}, \lambda_0\in\mathbb{R}$ son soluciones de equilibrio del sistema, es decir, $G(u_{0},\lambda_{0}) = 0$. Este sistema se puede resolver numéricamente con el método de Newton.
+
+$$\begin{pmatrix} u_{k} \\ \lambda_{k} \end{pmatrix} = \begin{pmatrix} u_{k-1} \\ \lambda_{k-1} \end{pmatrix} - \begin{pmatrix}
+G_{u}(u_{k-1},\lambda_{k-1}) & G_{p}(u_{k-1},\lambda_{k-1}) \\
+\left( \frac{du_{k-1}}{ds} \right)^{T} & \frac{d\lambda_{k-1}}{ds}
+\end{pmatrix}^{-1}\begin{pmatrix}
+G(u_{k-1},\lambda_{k-1}) \\
+(u_{k-1} - u_{0})\cdot\frac{du_{k-1}}{ds} + (\lambda_{k-1} - \lambda_{0})\frac{d\lambda_{k-1}}{ds} - \Delta s
+\end{pmatrix}$$
+
+Para hayar los valores de $\frac{du_{k}}{ds}$ y $\frac{d\lambda_{k}}{ds}$ se parte de hayar el valor inicial y predecir el siguiente mediante un sistema matricial. Para encontrar los valores iniciales, usamos la derivada de $\frac{du}{dp}$ que se puede calcular gracias al Teorema de la Función Implícita (ITF).
+
+$$\dfrac{du}{d\lambda} = -G_{u}^{-1}G_{p}$$
+
+$$\Rightarrow\dfrac{du}{ds} = \dfrac{du}{d\lambda}\dfrac{d\lambda}{ds}=-G_{u}^{-1}G_{p}\dfrac{d\lambda}{ds}$$
+
+\begin{equation}
+\dfrac{du}{ds} = -G_{u}^{-1}G_{p}\dfrac{d\lambda}{ds}
+\label{eq:duds}
+\end{equation}
+
+Por otro lado, buscamos que:
+
+$$||\Delta u||^{2} + |\Delta	\lambda|^{2} = |\Delta s|$$
+
+$$\Rightarrow \left|\left| \dfrac{\Delta u}{\Delta s} \right|\right|^{2} + \left|\dfrac{\Delta \lambda}{\Delta s} \right|^{2} = 1\Rightarrow \left|\left| \dfrac{d u}{d s} \right|\right|^{2} + \left|\dfrac{d \lambda}{d s} \right|^{2} = 1\Rightarrow||-G_{u}^{-1}G_{p}||^{2}\left|\dfrac{d\lambda}{ds}\right|^{2} + \left|\dfrac{d \lambda}{d s} \right|^{2} = 1$$
+
+\begin{equation}
+\dfrac{d\lambda}{ds} = \pm \dfrac{1}{\sqrt{||-G_{u}G_{p}||^{2} + 1}}
+\label{eq:dlamds}
+\end{equation}
+
+Las ecuaciones \ref{eq:duds} y \ref{eq:dlamds} permiten conocer el valor de las derivadas faltantes a partir de los valores iniciales $u_{0}, \lambda_{0}$. Para predecir las siguientes derivadas se resuelve el siguiente sistema:
+
+$$\begin{pmatrix}
+G_{u}(u_{k-1},\lambda_{k-1}) & G_{p}(u_{k-1},\lambda_{k-1}) \\
+\frac{du_{k-1}}{ds} & \frac{d\lambda_{k-1}}{ds}
+\end{pmatrix}\begin{pmatrix}
+\frac{du_{k}}{ds} \\
+\frac{d\lambda_{k}}{ds}
+\end{pmatrix} = \begin{pmatrix}
+0_{n\times 1} \\
+1
+\end{pmatrix}$$
+
+\section{PALC en ramas periódicas}
+
+El sistema para ramas periódicas cambia, aquí contamos con 3 ecuaciones. Si $F:D_{F}\in\mathbb{R}^{n}\mathbb{R} \to \mathbb{R}^{n}$ describe un sistema de ecuaciones diferenciales, tenemos que el sistema a resolver en soluciones periódicas es:
+
+$$\begin{array}{rcl} 
+u(1) - u(0) & = & 0 \\
+\int_{0}^{1}u(t)\cdot u_{0}'(t) & = & 0 \\
+\int_{0}^{1}(u(t)-u_{0}(t))\cdot\dot{u}(t)dt + (T-T_{0})\dot{T} + (\lambda - \lambda_{0})\dot{\lambda} - \Delta	 s & = & 0
+\end{array}$$
+
+donde contamos con la aproximación BVP (Problema del valor de frontera) que es
+
+$$u'(t) = TF(u,\lambda)$$
+
+donde $u'(t) = \dfrac{du}{dt}$, $\dot{u} = \dfrac{du}{ds}$. Los valores uniciales son $u_{0}\in\mathbb{R}^{n}$, $\lambda\in\mathbb{R}$ con $T\in \mathbb{R}$ el periodo de la solución en ese punto.
+
+Las funciones del jacobiano se pueden obtener de la siguiente manera:
+
+\begin{itemize}
+
+	\item $\dfrac{\partial}{\partial u_{j}}(u_{i}(1) - u_{i}(0)) = \dfrac{\partial u_{i}}{\partial u_{j}} = \dfrac{\partial u_{i} / \partial t}{\partial u_{j} / \partial t} = \dfrac{F_{i}(u(1),\lambda)}{F_{j}(u(1),\lambda)}$
+	
+	\item $\dfrac{\partial}{\partial T}(u(1) - u(0)) = \int_{0}^{1}F(u(t),\lambda)dt - u(0)$
+	
+	\item $\dfrac{\partial}{\partial \lambda}(u(1) - u(0))$
+	
+	\item $\dfrac{\partial}{\partial u_{j}}\int_{0}^{1}u(t)\cdot u_{0}'(t)dt = \int_{0}^{1}\dfrac{F(u(t),\lambda) \cdot u_{0}'(t) }{F_{j}(u(t),\lambda)} dt$
+	
+	\item $\dfrac{\partial}{\partial T}\int_{0}^{1}u(t)\cdot u_{0}'(t)dt = \int_{0}^{1}\int_{0}^{1}F(u(\tau),\lambda)d\tau\cdot u_{0}'(t)dt$
+	
+	
+
+\end{itemize}
+
+
+
+
+
+
+
+\end{document}
