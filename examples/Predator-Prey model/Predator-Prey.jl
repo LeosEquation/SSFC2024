@@ -133,3 +133,135 @@ begin
 end
 
 #-
+
+prueba = Equilibrium(f!,x_ini[3],p_ini,t,Δs,p_fin)
+pb, xb = Hopf_Points(f!,prueba,t,p_fin)[1]
+
+#-
+
+function fp!(du,u,λ,t)
+    du[1] = - 1 + exp(-5*u[1])
+    du[2] = 0.0
+end;
+
+#-
+
+function G(f!,x,p,T,Δs,x0,p0,T0; orden = 20, tol = 1.e-20)
+    Time, X = integracion_taylor(f!,x,0.0,T,20,1.e-20,p; Nt = 100)
+    Time0, X0 = integracion_taylor(f!,x0,0.0,T,20,1.e-20,p0; Nt = 100)
+
+    G1 = X[end] - x
+
+    dX = [zeros(length(i)) for i in X]
+    dX0 = [zeros(length(i)) for i in X0]
+
+    for i in 1:length(Time)
+        dx = zeros(length(x))
+        f!(dx,X[i],p,Time[i])
+        dX[i] = copy(dx)
+    end
+
+    for i in 1:length(Time0)
+        dx = zeros(length(x))
+        f!(dx,X0[i],p0,Time0[i])
+        dX0[i] = copy(dx)
+    end
+
+    G2 = 0.0
+
+    for i in 2:length(Time)
+
+        G2 += 0.5*(Time[i]*Time[i-1])*((X[i-1] ⋅ dX0[i-1]) + (X[i] ⋅ dX0[i]))
+
+    end
+
+    #G3 = (x-x0) ⋅ x_s + (T - T0)*T_s + (p-p0)*p_s - Δs
+
+    return [G1;G2]
+
+end
+
+#-
+
+G(f!,xb,pb + 0.001 ,T + 0.001,0.001,xb,pb,T)
+
+#-
+
+n = length(xb)
+Jx = zeros(n,n)
+Jp = zeros(n)
+F0 = zeros(n)
+s = Taylor1(2)
+r = Taylor1([0.0,0.0],2)
+
+#-
+
+x = xb
+p = pb
+t = 0.0
+
+#-
+
+for i in 1:n
+    for j in 1:n
+        dx = [s for i in 1:n]
+        f!(dx,x+[j == k ? s : r for k in 1:n],p + r, t + r)
+        Jx[i,j] = derivative(dx[i])(0.0)
+    end
+end
+
+#-
+
+for i in 1:n
+    dx = [s for i in 1:n]
+    f!(dx,x .+ r,p + s,t + r)
+    Jp[i] = derivative(dx[i])(0.0)
+end
+
+#-
+
+T = 2*π / abs(imag(eigvals(Jx)[1]))
+
+#-
+
+h = (1.e-16)^(1/3) * norm(pb)
+
+#-
+
+x = [1.0,1.0]
+p = 1.0
+h = 1.e-12
+
+#-
+
+Time1, X = integracion_taylor(f!,x,0.0,T,20,1.e-20,p; Nt = 100)
+Timeb, Xb = integracion_taylor(f!,x,0.0,T,20,1.e-20,p - h; Nt = 100)
+Timef, Xf = integracion_taylor(f!,x,0.0,T,20,1.e-20,p + h; Nt = 100)
+Time2, X2 = integracion_taylor(fp!,x,0.0,T,20,1.e-20,p; Nt = 100)
+Time3, X3 = integracion_taylor(fp1!,x,0.0,T,20,1.e-20,p; Nt = 100)
+
+#-
+
+Xp = (Xf .- Xb) ./ (2*h)
+
+#-
+
+plot(Time, [[i[1] for i in X],[i[1] for i in Xb],[i[1] for i in Xf]])
+
+#-
+
+plot(Time, [[i[2] for i in X],[i[2] for i in Xb],[i[2] for i in Xf]])
+
+#-
+
+plot(Time,[[i[1]-x[1] for i in X2],[i[1] for i in Xp]])
+
+#-
+
+function g!(dx,x,p,t)
+    f!(dx,x,p,t)
+    dx[1] = T*dx[1]
+    dx[2] = T*dx[2]
+end
+
+#-
