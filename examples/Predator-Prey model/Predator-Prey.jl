@@ -11,125 +11,141 @@ function f!(du,u,λ,t)
     du[2] = -u[2] + 3*u[1]*u[2]
 end;
 
+function df!(J,u,λ,t)
+    J[1,1] = 3 - 6*u[1] - u[2] - 5*λ*exp(-5*u[1])
+    J[1,2] = -u[1]
+    J[2,1] = 3*u[2]
+    J[2,2] = -1.0 + 3*u[1]
+end;
+
 #-
 
 begin
     x_ini = [[0.0,0.0],[1.0,0.0],[1/3,2.0]]
     p_ini = 0.0
-    Δs= 0.001
-    p_fin = 0.9
     t = 0.0
+    Ne = 5000
+    Np = 250
 end;
 
 #-
 
 tiempo = @elapsed begin
-    ramas_de_equilibrio = Equilibrium.(f!, x_ini, p_ini, t, Δs, p_fin)
-    LBP = Limit_Points.(f!,ramas_de_equilibrio,t,p_fin)
-    HBP = Hopf_Points.(f!,ramas_de_equilibrio,t,p_fin)
-    estabilidad = Stability_intervals.(f!,t,ramas_de_equilibrio)
+
+# Primero calculamos las 3 ramas de equilibrio con sus bifurcaciones de Hopf y LP a un paso de 0.001
+
+ramas_de_equilibrio = Equilibrium.(f!, x_ini, p_ini, t, 0.001, Ne, bifurcations = true);
+
+# Sabemos que en la rama 3 hay una bifurcación de Hopf, entonces calculamos la rama periódica aquí a un paso de 0.01
+
+rama_periodica = Periodic_Orbits(f!, ramas_de_equilibrio[3][8][1, :], ramas_de_equilibrio[3][7][1], t, 0.1, 0.0001, Np; newtontol = 1.e-12, integmaxsteps = 5000)
+
 end;
+
 
 #-
 
 begin
-    LBP_2D = [[(LBP[i][j][1],LBP[i][j][2][1]) for j in 1:length(LBP[i])] for i in 1:length(LBP)]
-    HBP_2D = [[(HBP[i][j][1],HBP[i][j][2][1]) for j in 1:length(HBP[i])] for i in 1:length(HBP)]
-    estable = [[(estabilidad[i][1][j][1],estabilidad[i][1][j][2][1]) for j in 1:length(estabilidad[i][1])] for i in 1:length(estabilidad)]
-    inestable = [[(estabilidad[i][2][j][1],estabilidad[i][2][j][2][1]) for j in 1:length(estabilidad[i][2])] for i in 1:length(estabilidad)]
-end;
 
-#-
+    plot(title = "Predator-Prey Model \n Tiempo : $(tiempo) s", ylabel = "Fish", xlabel = "Quota")
 
-begin
-    plot(title = "Predator-Prey Model \n Tiempo de ejecución = $(tiempo) s", ylabel = "Fish", xlabel = "Quota")
-    plot!(estable[1], label = "Estable", linestyle = :solid, color = "blue")
-    plot!(inestable[1], label = "Inestable", linestyle = :dash, color = "blue")
-    scatter!(LBP_2D[1], label = "Bifurcación LP", color = "white")
-    scatter!(HBP_2D[1], label = "Bifurcación Hopf", color = "red")
-    ylims!(-0.1,1.0)
-    xlims!(0.0,0.9)
+    p, x, estable, inestable, pf, xf, pb, xb = ramas_de_equilibrio[1]
 
-    for i in 1:length(ramas_de_equilibrio)
-    plot!(estable[i], label = "", linestyle = :solid, color = "blue")
-    plot!(inestable[i], label = "", linestyle = :dash, color = "blue")
-    scatter!(LBP_2D[i], label = "", color = "white")
-    scatter!(HBP_2D[i], label = "", color = "red")
+    plot!([estable[i] ? p[i] : NaN for i in 1:Ne], [estable[i] ? x[i, 1] : NaN for i in 1:Ne], label = "Stable", linestyle = :solid, color = "blue")
+    plot!([!estable[i] ? p[i] : NaN for i in 1:Ne], [!estable[i] ? x[i, 1] : NaN for i in 1:Ne], label = "Unstable", linestyle = :dash, color = "blue")
+
+    scatter!(pf, xf[:, 1], label = "Fold bifurcation", color = "white")
+    scatter!(pb, xb[:, 1], label = "Hopf bifurcation", color = "red")
+
+    for i in 2:3
+
+        p, x, estable, inestable, pf, xf, pb, xb = ramas_de_equilibrio[i]
+
+        plot!([estable[i] ? p[i] : NaN for i in 1:Ne], [estable[i] ? x[i, 1] : NaN for i in 1:Ne], label = "", linestyle = :solid, color = "blue")
+        plot!([!estable[i] ? p[i] : NaN for i in 1:Ne], [!estable[i] ? x[i, 1] : NaN for i in 1:Ne], label = "", linestyle = :dash, color = "blue")
+
+        scatter!(pf, xf[:, 1], label = "", color = "white")
+        scatter!(pb, xb[:, 1], label = "", color = "red")
+
     end
 
-    savefig("Predator-Prey fish.png")
+    P, X, T, estable_p = rama_periodica
+
+    times = [0.0:T[i]/1000:T[i] for i in 2:Np]
+    sol = taylorinteg.(f!, [X[i,:] for i in 2:Np], times, 20, 1.e-20, P[2:Np])
+
+    plot!(P, [X[1, 1]; [maximum(sol[i][:, 1]) for i in 1:Np-1]], label = "Max órbita periódica")
+    plot!(P, [X[1, 1]; [minimum(sol[i][:, 1]) for i in 1:Np-1]], label = "Min órbita periódica")
+
+    ylims!(-0.25, 1.25)
+    xlims!(0.0, 0.9)
+
+    savefig("Predator-Prey-fish2.png")
+
 end;
 
 #-
 
 begin
-    LBP_3D = [[(LBP[i][j][2][2],LBP[i][j][1],LBP[i][j][2][1]) for j in 1:length(LBP[i])] for i in 1:length(LBP)]
-    HBP_3D = [[(HBP[i][j][2][2],HBP[i][j][1],HBP[i][j][2][1]) for j in 1:length(HBP[i])] for i in 1:length(HBP)]
 
-    plot(title = "Predator-Prey Model \n Tiempo de ejecución = $(tiempo) s", ylabel = "Quota", xlabel = "Sharks", zlabel = "Fish", camera = (60, 25))
+    plot(title = "Predator-Prey Model \n Tiempo : $(tiempo) s", ylabel = "Shark", xlabel = "Fish")
 
-    for i in 1:3
-        x = zeros(length(ramas_de_equilibrio[i][1]))
+    scatter!((X[1, 1], X[1, 2]), label = "Hopf bifurcation", color = "red")
 
-        y_estable = zeros(length(ramas_de_equilibrio[i][1]))
-        z_estable = zeros(length(ramas_de_equilibrio[i][1]))
+    plot!(sol[1][:, 1], sol[1][:, 2], label = "Órbitas periódicas", color = "blue")
 
-        y_inestable = zeros(length(ramas_de_equilibrio[i][1]))
-        z_inestable = zeros(length(ramas_de_equilibrio[i][1]))
+    for i in 2:Np-1
 
-        x = ramas_de_equilibrio[i][1]
+        plot!(sol[i][:, 1], sol[i][:, 2], label = "", color = "blue")
 
-        for j in 1:length(estabilidad[i][1])
-            y_estable[j] = estabilidad[i][1][j][2][2]
-            z_estable[j] = estabilidad[i][1][j][2][1]
-        end
-
-        for j in 1:length(estabilidad[i][2])
-            y_inestable[j] = estabilidad[i][2][j][2][2]
-            z_inestable[j] = estabilidad[i][2][j][2][1]
-        end
-
-        if i == 1
-            plot!(y_estable,x,z_estable,xflip = true, color = "blue",linestyle = :solid, label = "Estable")
-            plot!(y_inestable,x,z_inestable,xflip = true, color = "blue",linestyle = :dash, label = "Inestable")
-            scatter!(LBP_3D[i], label = "Bifurcación LP", color = "white")
-            scatter!(HBP_3D[i], label = "Bifurcación Hopf", color = "red")
-        else
-            plot!(y_estable,x,z_estable,xflip = true, color = "blue",linestyle = :solid, label = "")
-            plot!(y_inestable,x,z_inestable,xflip = true, color = "blue",linestyle = :dash, label = "")
-            scatter!(LBP_3D[i], label = "", color = "white")
-            scatter!(HBP_3D[i], label = "", color = "red")
-        end
     end
 
+    savefig("Predator-Prey-periodic2.png")
 
-    ylims!(-0.1,1.0)
-    xlims!(-0.5,2.0)
-    zlims!(-0.25,1.0)
-    savefig("Predator-Prey Model.png")
+end;
+
+#-
+
+begin
+
+    plot(title = "Predator-Prey Model \n Tiempo : $(tiempo) s", size=(600, 600), camera = (-30, 15), zlabel = "Fish", ylabel = "Shark", xlabel = "Quota")
+
+    p, x, estable, inestable, pf, xf, pb, xb = ramas_de_equilibrio[1]
+
+    plot!([estable[i] ? p[i] : NaN for i in 1:Ne], [estable[i] ? x[i, 2] : NaN for i in 1:Ne], [estable[i] ? x[i, 1] : NaN for i in 1:Ne], label = "Stable", linestyle = :solid, color = "blue")
+    plot!([!estable[i] ? p[i] : NaN for i in 1:Ne], [!estable[i] ? x[i, 2] : NaN for i in 1:Ne], [!estable[i] ? x[i, 1] : NaN for i in 1:Ne], label = "Unstable", linestyle = :dash, color = "blue")
+
+    scatter!(pf, xf[:, 2], xf[:, 1], label = "Fold bifurcation", color = "white")
+    scatter!(pb, xb[:, 2], xb[:, 1], label = "Hopf bifurcation", color = "red")
+
+    for i in 2:3
+
+        p, x, estable, inestable, pf, xf, pb, xb = ramas_de_equilibrio[i]
+
+        plot!([estable[i] ? p[i] : NaN for i in 1:Ne], [estable[i] ? x[i, 2] : NaN for i in 1:Ne], [estable[i] ? x[i, 1] : NaN for i in 1:Ne], label = "", linestyle = :solid, color = "blue")
+        plot!([!estable[i] ? p[i] : NaN for i in 1:Ne], [!estable[i] ? x[i, 2] : NaN for i in 1:Ne], [!estable[i] ? x[i, 1] : NaN for i in 1:Ne], label = "", linestyle = :dash, color = "blue")
+
+        scatter!(pf, xf[:, 2], xf[:, 1], label = "", color = "white")
+        scatter!(pb, xb[:, 2], xb[:, 1], label = "", color = "red")
+
+    end
+
+    P, X, T = rama_periodica
+
+    times = 0.0:T[2]/1000:T[2]
+    sol = taylorinteg(f!, X[2,:], times, 20, 1.e-20, P[2])
+    plot!([P[2] for i in 1:1001], sol[:, 2], sol[:, 1], label = "Órbita periodica", color = "red")
+
+    for i in 20:20:Np
+        times = 0.0:T[i]/1000:T[i]
+        sol = taylorinteg(f!, X[i,:], times, 20, 1.e-20, P[i])
+        plot!([P[i] for j in 1:1001], sol[:, 2], sol[:, 1], label = "", color = "red")
+    end
+
+    xlims!(-0.25, 1.0)
+    ylims!(-0.5 , 2.0)
+    zlims!(-0.25, 1.0)
+
+    savefig("Predator-Prey Model2.png")
+
 end
-
-#-
-
-begin
-    #=
-    for i in 1:length(x_ini)
-        normas = []
-        for j in 1:length(ramas_de_equilibrio[i][1])
-            dx = zeros(length(x_ini))
-            f!(dx,ramas_de_equilibrio[i][2][j],ramas_de_equilibrio[i][1][j],t)
-            push!(normas,norm(dx))
-        end
-        if i == 2
-            precision = plot(title = "Precisión de la rama", ylabel = "||F(u(λ),λ)||", xlabel = "λ")
-            plot!(ramas_de_equilibrio[i][1],normas ,label = "λ_ini = $(p_ini), x_ini = $(x_ini[i])")
-        else
-            precision = plot(title = "Precisión de la rama", ylabel = "||F(u(λ),λ)|| / 1×10⁻¹⁶", xlabel = "λ")
-            plot!(ramas_de_equilibrio[i][1],normas .* 1.e16 ,label = "λ_ini = $(p_ini), x_ini = $(x_ini[i])")
-        end
-        savefig("PrecisiónRama$(i).png")
-    end
-    =#
-end
-
-#-
