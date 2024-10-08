@@ -4,301 +4,483 @@
 
 #-
 
-function Limit_Points(f::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Float64}},t::Float64,p_fin::Float64; ω = 1.0, test = false)
-    
-    initial_values = LP_initial_values(f,equilibrium_branch,t)
+function Limit_Points!(f::Function, pf::Vector{Float64}, xf::Vector{Float64}; newtonite = 8, newtontol = 1.e-16)
 
-    p_min = minimum([equilibrium_branch[1][1],p_fin])
-    p_max = maximum([equilibrium_branch[1][1],p_fin])
+    m = length(xf)
 
-    LPs = Vector{Float64}[]
+    w = 1.0
 
-    for initial_value in initial_values
-        p0, x0, v0, λ0 = initial_value
+    F = zeros(3)
+    J = zeros(3, 3)
 
-        x = x0
-        p = p0
-        v = v0
+    S = set_variables("s", numvars = 2, order = 2)
 
-        i = 1
+    r = zero(S[1])
 
-        while i <= 30 && norm(LP_Function(f,x,p,v,t; ω = ω)) > 1.e-16 && norm(λ0) > 1.e-16
+    dfx = 0.0
+    dfp = 0.0
+    dfxx = 0.0
+    dfxp = 0.0
 
-            if test
-                println("Paso $(i): λ = $(p)")
-                println("           x = $(x)")
-                println("           norm(LP_Function) = $(norm(LP_Function(f,x,p,v,t)))")
-                println("\n")
-                show(stdout, "text/plain",  LP_Function(f,x,p,v,t))
-                println("\n")
+    zerosTN = zeros(2)
+
+    Δ = zeros(3)
+
+    if m != 0
+
+        for i in 1:m
+
+            println(" \n Fold $(i) : \n ")
+
+            dx = f(xf[i] + S[1], pf[i] + S[2], t + r)
+
+            dfx = differentiate(dx, 1)(zerosTN)
+            dfp = differentiate(dx, 2)(zerosTN)
+            dfxx = differentiate(differentiate(dx, 1),1)(zerosTN)
+            dfxp = differentiate(differentiate(dx, 1),2)(zerosTN)
+
+            v = dfx
+
+            LP_Function!(F, f, dfx, xf[i], pf[i], v, w, t)
+            LP_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w)
+
+            j = 1
+
+            while j <= newtonite && norm(F) > newtontol
+
+                Δ .= - inv(J)*F
+
+                xf[i] += Δ[1]
+                pf[i] += Δ[2]
+                v += Δ[3]
+
+                dx = f(xf[i] + S[1], pf[i] + S[2], t + r)
+
+                dfx = differentiate(dx, 1)(zerosTN)
+                dfp = differentiate(dx, 2)(zerosTN)
+                dfxx = differentiate(differentiate(dx, 1),1)(zerosTN)
+                dfxp = differentiate(differentiate(dx, 1),2)(zerosTN)
+
+                LP_Function!(F, f, dfx, xf[i], pf[i], v, w, t)
+                LP_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w)
+
+                j += 1
+
+                println("$(j) : $(norm(F))")
+
             end
 
-            ω = v
-
-            X = [x;p;v] - inv(LP_Jacobian(f,x,p,v,t; ω = ω))*LP_Function(f,x,p,v,t; ω = ω)
-            x = X[1]
-            p = X[2]
-            v = X[3]
-            i += 1
-        end
-        
-        if p_min <= p <= p_max
-            push!(LPs,[p,x])
         end
 
     end
-
-        return LPs
+    
 end
 
 #-
 
-function Limit_Points(f::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Float64}},t::Float64,p_ini::Vector{Float64},indice::Int64,p_fin::Float64; ω = 1.0, test = false)
-    
-    initial_values = LP_initial_values(f,equilibrium_branch,t,p_ini,indice)
+function Limit_Points!(f::Function, pf::Matrix{Float64}, xf::Vector{Float64}, indice::Int64; newtonite = 8, newtontol = 1.e-16)
 
-    p_min = minimum([equilibrium_branch[1][1],p_fin])
-    p_max = maximum([equilibrium_branch[1][1],p_fin])
+    m = length(xf)
+    mp, np = size(pf)
 
-    LPs = Vector{Float64}[]
+    w = 1.0
 
-    for initial_value in initial_values
-        p0, x0, v0, λ0 = initial_value
+    F = zeros(3)
+    J = zeros(3, 3)
 
-        x = x0
-        p = p0
-        v = v0
+    S = set_variables("s", numvars = 2, order = 2)
+    r = zero(S[1])
 
-        i = 1
+    Sp = [i == indice ? S[end] : r for i in 1:np]
 
-        while i <= 30 && norm(LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)) > 1.e-16 && norm(λ0) > 1.e-16
+    dfx = 0.0
+    dfp = 0.0
+    dfxx = 0.0
+    dfxp = 0.0
 
-            if test
-                println("Paso $(i): λ = $(p)")
-                println("           x = $(x)")
-                println("           v = $(v)")
-                println("           norm(LP_Function) = $(norm(LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)))")
-                println("\n")
-                show(stdout, "text/plain",  LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω))
-                println("\n")
+    zerosTN = zeros(2)
+
+    Δ = zeros(3)
+
+    if m != 0
+
+        for i in 1:m
+
+            println(" \n Fold $(i) : \n ")
+
+            dx = f(xf[i] + S[1], pf[i, :] .+ Sp, t + r)
+
+            dfx = differentiate(dx, 1)(zerosTN)
+            dfp = differentiate(dx, 2)(zerosTN)
+            dfxx = differentiate(differentiate(dx, 1),1)(zerosTN)
+            dfxp = differentiate(differentiate(dx, 1),2)(zerosTN)
+
+            v = dfx
+
+            LP_Function!(F, f, dfx, xf[i], pf[i, :], v, w, t)
+            LP_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w)
+
+            j = 1
+
+            while j <= newtonite && norm(F) > newtontol
+
+                Δ .= - inv(J)*F
+
+                xf[i] += Δ[1]
+                pf[i, indice] += Δ[2]
+                v += Δ[3]
+
+                dx = f(xf[i] + S[1], pf[i, :] .+ Sp, t + r)
+
+                dfx = differentiate(dx, 1)(zerosTN)
+                dfp = differentiate(dx, 2)(zerosTN)
+                dfxx = differentiate(differentiate(dx, 1),1)(zerosTN)
+                dfxp = differentiate(differentiate(dx, 1),2)(zerosTN)
+
+                LP_Function!(F, f, dfx, xf[i], pf[i, :], v, w, t)
+                LP_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w)
+
+                j += 1
+
+                println("$(j) : $(norm(F))")
+
             end
 
-            ω = v
-
-            X = [x;p;v] - inv(LP_Jacobian(f!,x,p,v,t,p_ini,indice; ω = ω))*LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)
-            x = X[1]
-            p = X[2]
-            v = X[3]
-            i += 1
-        end
-        
-        if p_min <= p <= p_max
-            push!(LPs,[p,x])
         end
 
     end
-
-        return LPs
-end
-#-
-
-function Limit_Points(f!::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Vector{Float64}}},t::Float64,p_fin::Float64; ω = ones(length(equilibrium_branch[2][1])), test = false)
     
-    initial_values = LP_initial_values(f!,equilibrium_branch,t)
-
-    p_min = minimum([equilibrium_branch[1][1],p_fin])
-    p_max = maximum([equilibrium_branch[1][1],p_fin])
-
-    LPs = Vector{Union{Float64,Vector{Float64}}}[]
-
-    for initial_value in initial_values
-        p0, x0, v0, λ0 = initial_value
-
-        x = x0
-        p = p0
-        v = v0
-
-        i = 1
-
-        while i <= 30 && norm(LP_Function(f!,x,p,v,t; ω = ω)) > 1.e-16 && norm(λ0) > 1.e-16
-
-            if test
-                println("Paso $(i): λ = $(p)")
-                println("           x = $(x)")
-                println("           norm(LP_Function) = $(norm(LP_Function(f!,x,p,v,t)))")
-                println("\n")
-                show(stdout, "text/plain",  LP_Function(f!,x,p,v,t))
-                println("\n")
-            end
-
-            ω = v
-
-            X = [x;p;v] - inv(LP_Jacobian(f!,x,p,v,t; ω = ω))*LP_Function(f!,x,p,v,t; ω = ω)
-            x = X[1:length(x)]
-            p = X[length(x)+1]
-            v = X[length(x)+2:end]
-            i += 1
-        end
-        
-        if p_min <= p <= p_max
-            push!(LPs,[p,x])
-        end
-
-    end
-
-        return LPs
 end
 
 #-
 
-function Limit_Points(f!::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Vector{Float64}}},t::Float64,p_ini::Vector{Float64},indice::Int64,p_fin::Float64; ω = ones(length(equilibrium_branch[2][1])), test = false)
-    
-    initial_values = LP_initial_values(f!,equilibrium_branch,t,p_ini,indice)
+function Limit_Points!(f!::Function, pf::Vector{Float64}, xf::Matrix{Float64}, test::Vector{Int64}; newtonite = 8, newtontol = 1.e-16)
 
-    p_min = minimum([equilibrium_branch[1][1],p_fin])
-    p_max = maximum([equilibrium_branch[1][1],p_fin])
+    m, n = size(xf)
 
-    LPs = Vector{Union{Float64,Vector{Float64}}}[]
+    F = zeros(2*n + 1)
+    J = zeros(2*n + 1, 2*n + 1)
 
-    for initial_value in initial_values
-        p0, x0, v0, λ0 = initial_value
+    S = set_variables("s", numvars = n + 1, order = 2)
 
-        x = x0
-        p = p0
-        v = v0
+    r = zero(S[1])
 
-        i = 1
+    dx = [S[1] for i in 1:n]
 
-        while i <= 30 && norm(LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)) > 1.e-16 && norm(λ0) > 1.e-16
+    dfx = zeros(n,n)
+    dfp = zeros(n)
+    dfxx = zeros(n,n,n)
+    dfxp = zeros(n,n)
 
-            if test
-                println("Paso $(i): λ = $(p)")
-                println("           x = $(x)")
-                println("           v = $(v)")
-                println("           norm(LP_Function) = $(norm(LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)))")
-                println("\n")
-                show(stdout, "text/plain",  LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω))
-                println("\n")
+    v = zeros(n)
+
+    w = zeros(n)
+
+    zerosTN = zeros(n + 1)
+
+    Δ = zeros(2*n + 1)
+
+    if m != 0
+
+        for i in 1:m
+
+            # println(" \n Fold $(i) : \n ")
+
+            f!(dx, xf[i, :] .+ S[1:n], pf[i] + S[n + 1], t + r)
+
+            dfx  .= [differentiate(dx[i], j)(zerosTN) for i in 1:n, j in 1:n]
+            dfp  .= [differentiate(dx[i], n + 1)(zerosTN) for i in 1:n]
+            dfxx .= [differentiate(differentiate(dx[i], j), k)(zerosTN) for i in 1:n, j in 1:n, k in 1:n]
+            dfxp .= [differentiate(differentiate(dx[i], j), n + 1)(zerosTN) for i in 1:n, j in 1:n]
+
+            v .= real.(eigvecs(dfx)[:, test[i]])
+
+            w .= v
+
+            LP_Function!(F, dfx, dx(zerosTN), v, w, n)
+            LP_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w, n)
+
+            j = 1
+
+            while j < newtonite && norm(F) > newtontol
+
+                Δ .= - inv(J)*F
+
+                xf[i, :] .+= Δ[1:n]
+                pf[i]     += Δ[n + 1]
+                v        .+= Δ[n + 2:end]
+
+                f!(dx, xf[i, :] .+ S[1:n], pf[i] + S[n + 1], t + r)
+
+                dfx  .= [differentiate(dx[i], j)(zerosTN) for i in 1:n, j in 1:n]
+                dfp  .= [differentiate(dx[i], n + 1)(zerosTN) for i in 1:n]
+                dfxx .= [differentiate(differentiate(dx[i], j), k)(zerosTN) for i in 1:n, j in 1:n, k in 1:n]
+                dfxp .= [differentiate(differentiate(dx[i], j), n + 1)(zerosTN) for i in 1:n, j in 1:n]
+
+                LP_Function!(F, dfx, dx(zerosTN), v, w, n)
+                LP_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w, n)
+
+                j += 1
+
+                # println("$(j) : $(norm(F))")
+
             end
 
-            ω = v
-
-            X = [x;p;v] - inv(LP_Jacobian(f!,x,p,v,t,p_ini,indice; ω = ω))*LP_Function(f!,x,p,v,t,p_ini,indice; ω = ω)
-            x = X[1:length(x)]
-            p = X[length(x)+1]
-            v = X[length(x)+2:end]
-            i += 1
-        end
-        
-        if p_min <= p <= p_max
-            push!(LPs,[p,x])
         end
 
     end
 
-        return LPs
 end
 
 #-
 
-function Hopf_Points(f!::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Vector{Float64}}},t::Float64,p_fin::Float64; test = false)
-    
-    initial_values = Hopf_initial_values(f!,equilibrium_branch,t)
+function Limit_Points!(f!::Function, pf::Matrix{Float64}, xf::Matrix{Float64}, test::Vector{Int64}, indice::Int64; newtonite = 8, newtontol = 1.e-16)
 
-    p_min = minimum([equilibrium_branch[1][1],p_fin])
-    p_max = maximum([equilibrium_branch[1][1],p_fin])
+    m, n = size(xf)
+    mp, np = size(pf)
 
-    HPs = Vector{Union{Float64,Vector{Float64}}}[]
+    F = zeros(2*n + 1)
+    J = zeros(2*n + 1, 2*n + 1)
 
-    for initial_value in initial_values
-        p0, x0, κ0, v0, w0 = initial_value
+    S = set_variables("s", numvars = n + 1, order = 2)
+    r = zero(S[1])
 
-        x = x0
-        p = p0
-        v = v0
-        κ = κ0
-        w = w0
-        
-        i = 1
+    Sp = [i == indice ? S[end] : r for i in 1:np]
 
-        while i <= 30 && norm(Hopf_Function(f!,x,p,v,κ,t,w)) > 1.e-16
+    dx = [S[1] for i in 1:n]
 
-            if test
-                println("Paso $(i): λ = $(p)")
-                println("           x = $(x)")
-                println("           norm(Hopf_Function) = $(norm(Hopf_Function(f!,x,p,v,κ,t,w)))")
-                println("\n")
-                show(stdout, "text/plain",  Hopf_Function(f!,x,p,v,κ,t,w))
-                println("\n")
+    dfx = zeros(n,n)
+    dfp = zeros(n)
+    dfxx = zeros(n,n,n)
+    dfxp = zeros(n,n)
+
+    zerosTN = zeros(n + 1)
+
+    Δ = zeros(2*n + 1)
+
+    if m != 0
+
+        for i in 1:m
+
+            # println(" \n Fold $(i) : \n ")
+
+            f!(dx, xf[i, :] .+ S[1:n], pf[i, :] .+ Sp, t + r)
+
+            dfx .= [differentiate(dx[i], j)(zerosTN) for i in 1:n, j in 1:n]
+            dfp .= [differentiate(dx[i], n + 1)(zerosTN) for i in 1:n]
+            dfxx .= [differentiate(differentiate(dx[i], j), k)(zerosTN) for i in 1:n, j in 1:n, k in 1:n]
+            dfxp .= [differentiate(differentiate(dx[i], j), n + 1)(zerosTN) for i in 1:n, j in 1:n]
+
+            v = real.(eigvecs(dfx)[:, test[i]])
+
+            w = v
+
+            LP_Function!(F, dfx, dx(zerosTN), v, w, n)
+            LP_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w, n)
+
+            j = 1
+
+            while j < newtonite && norm(F) > newtontol
+
+                Δ .= - inv(J)*F
+
+                xf[i, :] .+= Δ[1:n]
+                pf[i, indice] += Δ[n + 1]
+                v .+= Δ[n + 2:end]
+
+                f!(dx, xf[i, :] .+ S[1:n], pf[i, :] .+ Sp, t + r)
+
+                dfx  .= [differentiate(dx[i], j)(zerosTN) for i in 1:n, j in 1:n]
+                dfp  .= [differentiate(dx[i], n + 1)(zerosTN) for i in 1:n]
+                dfxx .= [differentiate(differentiate(dx[i], j), k)(zerosTN) for i in 1:n, j in 1:n, k in 1:n]
+                dfxp .= [differentiate(differentiate(dx[i], j), n + 1)(zerosTN) for i in 1:n, j in 1:n]
+
+                LP_Function!(F, dfx, dx(zerosTN), v, w, n)
+                LP_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w, n)
+
+                j += 1
+
+                # println("$(j) : $(norm(F))")
+
             end
 
-            X = [x;p;v;κ] - inv(Hopf_Jacobian(f!,x,p,v,κ,t,w))*Hopf_Function(f!,x,p,v,κ,t,w)
-            x = X[1:length(x)]
-            p = X[length(x)+1]
-            v = X[length(x)+2:2*length(x)+1]
-            κ = X[end]
-
-            i += 1
-        end
-
-        if p_min <= p <= p_max
-            push!(HPs,[p,x])
         end
 
     end
 
-        return HPs
 end
 
 #-
 
-function Hopf_Points(f!::Function,equilibrium_branch::Tuple{Vector{Float64}, Vector{Vector{Float64}}},t::Float64,p_ini::Vector{Float64},indice::Int64,p_fin::Float64; test = false)
-    
-    initial_values = Hopf_initial_values(f!,equilibrium_branch,t,p_ini,indice)
+function Hopf_Points!(f!::Function, pb::Vector{Float64}, xb::Matrix{Float64}, test::Vector{Int64}; newtonite = 8, newtontol = 1.e-16)
 
-    p_min = minimum([equilibrium_branch[1][1],p_fin])
-    p_max = maximum([equilibrium_branch[1][1],p_fin])
+    m, n = size(xb)
 
-    HPs = Vector{Union{Float64,Vector{Float64}}}[]
+    F = zeros(2*n + 2)
+    J = zeros(2*n + 2, 2*n + 2)
 
-    for initial_value in initial_values
-        p0, x0, κ0, v0, w0 = initial_value
+    S = set_variables("s", numvars = n + 1, order = 2)
 
-        x = x0
-        p = p0
-        v = v0
-        κ = κ0
-        w = w0
-        
-        i = 1
+    r = zero(S[1])
 
-        while i <= 30 && norm(Hopf_Function(f!,x,p,v,κ,t,w,p_ini,indice)) > 1.e-16
+    dx = [S[1] for i in 1:n]
 
-            if test
-                println("Paso $(i): λ = $(p)")
-                println("           x = $(x)")
-                println("           norm(Hopf_Function) = $(norm(Hopf_Function(f!,x,p,v,κ,t,w,p_ini,indice)))")
-                println("\n")
-                show(stdout, "text/plain",  Hopf_Function(f!,x,p,v,κ,t,w,p_ini,indice))
-                println("\n")
+    dfx = zeros(n,n)
+    dfp = zeros(n)
+    dfxx = zeros(n,n,n)
+    dfxp = zeros(n,n)
+
+    zerosTN = zeros(n + 1)
+
+    v = ones(n)
+
+    w = zeros(n)
+
+    Δ = zeros(2*n + 2)
+
+    if m != 0
+
+        for i in 1:m
+
+            # println(" \n Hopf $(i) : \n ")
+
+            f!(dx, xb[i, :] .+ S[1:n], pb[i] + S[n + 1], t + r)
+
+            dfx .= [differentiate(dx[i], j)(zerosTN) for i in 1:n, j in 1:n]
+            dfp .= [differentiate(dx[i], n + 1)(zerosTN) for i in 1:n]
+            dfxx .= [differentiate(differentiate(dx[i], j), k)(zerosTN) for i in 1:n, j in 1:n, k in 1:n]
+            dfxp .= [differentiate(differentiate(dx[i], j), n + 1)(zerosTN) for i in 1:n, j in 1:n]
+
+            k = imag(eigvals(dfx)[test[m]])^2
+
+            for i in 1:10
+                v .= (dfx^2 + k*I(n))\v
+                v .= v/norm(v)
             end
 
-            X = [x;p;v;κ] - inv(Hopf_Jacobian(f!,x,p,v,κ,t,w,p_ini,indice))*Hopf_Function(f!,x,p,v,κ,t,w,p_ini,indice)
-            x = X[1:length(x)]
-            p = X[length(x)+1]
-            v = X[length(x)+2:2*length(x)+1]
-            κ = X[end]
+            w .= nullspace(v')[:,1]
 
-            i += 1
-        end
-        
-        if p_min <= p <= p_max
-            push!(HPs,[p,x])
+            Hopf_Function!(F, dx(zerosTN), dfx, v, w, k, n)
+            Hopf_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w, k, n)
+
+            j = 1
+
+            while j <= newtonite && norm(F) > newtontol
+
+                Δ .= - inv(J)*F
+
+                xb[i, :] .+= Δ[1:n]
+                pb[i] += Δ[n + 1]
+                v .+= Δ[n + 2:2*n + 1]
+                k += Δ[end]
+
+                f!(dx, xb[i, :] .+ S[1:n], pb[i] + S[n + 1], t + r)
+
+                dfx .= [differentiate(dx[i], j)(zerosTN) for i in 1:n, j in 1:n]
+                dfp .= [differentiate(dx[i], n + 1)(zerosTN) for i in 1:n]
+                dfxx .= [differentiate(differentiate(dx[i], j), k)(zerosTN) for i in 1:n, j in 1:n, k in 1:n]
+                dfxp .= [differentiate(differentiate(dx[i], j), n + 1)(zerosTN) for i in 1:n, j in 1:n]
+
+                Hopf_Function!(F, dx(zerosTN), dfx, v, w, k, n)
+                Hopf_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w, k, n)
+
+                j += 1
+
+                # println("$(j) : $(norm(F))")
+
+            end
+
         end
 
     end
 
-        return HPs
+end
+
+#-
+
+
+function Hopf_Points!(f!::Function, pb::Matrix{Float64}, xb::Matrix{Float64}, test::Vector{Int64}, indice::Int64; newtonite = 8, newtontol = 1.e-16)
+
+    m, n = size(xb)
+    mp, np = size(pb)
+
+    F = zeros(2*n + 2)
+    J = zeros(2*n + 2, 2*n + 2)
+
+    S = set_variables("s", numvars = n + 1, order = 2)
+    r = zero(S[1])
+
+    Sp = [i == indice ? S[end] : r for i in 1:np]
+
+    dx = [S[1] for i in 1:n]
+
+    dfx = zeros(n,n)
+    dfp = zeros(n)
+    dfxx = zeros(n,n,n)
+    dfxp = zeros(n,n)
+
+    zerosTN = zeros(n + 1)
+
+    Δ = zeros(2*n + 2)
+
+    if m != 0
+
+        for i in 1:m
+
+            # println(" \n Hopf $(i) : \n ")
+
+            f!(dx, xb[i, :] .+ S[1:n], pb[i, :] .+ Sp, t + r)
+
+            dfx .= [differentiate(dx[i], j)(zerosTN) for i in 1:n, j in 1:n]
+            dfp .= [differentiate(dx[i], n + 1)(zerosTN) for i in 1:n]
+            dfxx .= [differentiate(differentiate(dx[i], j), k)(zerosTN) for i in 1:n, j in 1:n, k in 1:n]
+            dfxp .= [differentiate(differentiate(dx[i], j), n + 1)(zerosTN) for i in 1:n, j in 1:n]
+
+            v = one.(xb[1, :])
+
+            k = imag(eigvals(dfx)[test[i]])^2
+
+            for i in 1:10
+                v .= (dfx^2 + k*I(n))\v
+                v .= v/norm(v)
+            end
+
+            w = nullspace(v')[:,1]
+
+            Hopf_Function!(F, dx(zerosTN), dfx, v, w, k, n)
+            Hopf_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w, k, n)
+
+            j = 1
+
+            while j <= newtonite && norm(F) > newtontol
+
+                Δ .= - inv(J)*F
+
+                xb[i, :] .+= Δ[1:n]
+                pb[i, indice] += Δ[n + 1]
+                v .+= Δ[n + 2:2*n + 1]
+                k += Δ[end]
+
+                f!(dx, xb[i, :] .+ S[1:n], pb[i, :] .+ Sp, t + r)
+
+                dfx .= [differentiate(dx[i], j)(zerosTN) for i in 1:n, j in 1:n]
+                dfp .= [differentiate(dx[i], n + 1)(zerosTN) for i in 1:n]
+                dfxx .= [differentiate(differentiate(dx[i], j), k)(zerosTN) for i in 1:n, j in 1:n, k in 1:n]
+                dfxp .= [differentiate(differentiate(dx[i], j), n + 1)(zerosTN) for i in 1:n, j in 1:n]
+
+                Hopf_Function!(F, dx(zerosTN), dfx, v, w, k, n)
+                Hopf_Jacobian!(J, dfx, dfp, dfxx, dfxp, v, w, k, n)
+
+                j += 1
+
+                # println("$(j) : $(norm(F))")
+
+            end
+
+        end
+
+    end
+
 end
 
 #-
